@@ -10,10 +10,9 @@ def ok(values, message):
     )
 
 
-def formatError(values, message):
+def formatError(message, status_code):
     """Legacy function - use create_error_response instead"""
     return create_error_response(
         message=message,
-        error_code=status.HTTP_400_BAD_REQUEST,
-        status_code=status.HTTP_400_BAD_REQUEST,
+        error_code=status_code,
     )

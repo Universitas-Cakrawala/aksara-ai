@@ -65,7 +65,7 @@ def ok(values, message, status_code):
     )
 
 
-def formatError(values, message, status_code):
+def formatError(message, status_code):
     """Legacy function - use create_error_response instead"""
     return create_error_response(
         message=message, error_code=status_code, status_code=status_code

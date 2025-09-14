@@ -134,10 +134,10 @@ class UserController:
                 )
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def update(
@@ -282,10 +282,10 @@ class UserController:
             )
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def delete(
@@ -362,10 +362,10 @@ class UserController:
             return ok("", "Profile soft deleted successfully!", HTTP_OK)
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def login(
@@ -429,10 +429,10 @@ class UserController:
             return ok(transformerUserLoginUser, "Successfully Login!", HTTP_ACCEPTED)
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def profile(
@@ -470,10 +470,10 @@ class UserController:
             return ok(transformer, "Successfully Get user Profile!", HTTP_OK)
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def updatePasswordById(
@@ -550,7 +550,7 @@ class UserController:
             return ok("", "Update password successfully!", HTTP_OK)
         except HTTPException as e:
             db.rollback()
-            return formatError("", e.detail, e.status_code)
+            return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
-            return formatError("", str(e), HTTP_BAD_REQUEST)
+            return formatError(str(e), HTTP_BAD_REQUEST)
