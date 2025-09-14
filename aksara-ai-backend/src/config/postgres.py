@@ -1,6 +1,4 @@
 from decouple import config
-from sqlalchemy import event
-from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlmodel import SQLModel

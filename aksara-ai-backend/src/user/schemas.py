@@ -1,6 +1,5 @@
-from starlette.responses import JSONResponse
 from typing import List, Dict
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from src.utils.date import serialize_date
 from fastapi import Query
 from typing import Optional

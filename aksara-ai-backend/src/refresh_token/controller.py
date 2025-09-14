@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import Dict
 from src.auth.handler import (

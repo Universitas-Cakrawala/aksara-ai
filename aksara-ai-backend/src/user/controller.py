@@ -1,4 +1,4 @@
-from fastapi import Query, HTTPException, Depends
+from fastapi import HTTPException, Depends
 from starlette.responses import JSONResponse
 from src.user.models import (
     User,
@@ -18,7 +18,6 @@ from src.user.schemas import (
     UserUpdate,
     UserLogin,
     PasswordUpdate,
-    PasswordUpdateByUsername,
 )
 from src.constants import (
     HTTP_BAD_REQUEST,

@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Header, HTTPException, Depends
-from typing import Optional
+from fastapi import APIRouter, Depends
 from src.refresh_token.controller import (
     TokenHandler,
 )  # Pastikan TokenHandler diimpor dengan benar

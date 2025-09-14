@@ -1,5 +1,4 @@
 from starlette import status
-from starlette.responses import JSONResponse
 from src.common.schemas import create_success_response, create_error_response
 
 
