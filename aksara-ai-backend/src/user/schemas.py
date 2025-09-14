@@ -5,6 +5,7 @@ from src.utils.date import serialize_date
 from fastapi import Query
 from typing import Optional
 from datetime import date
+from src.common.schemas import create_success_response, create_error_response
 
 
 class PasswordUpdateByUsername(BaseModel):
@@ -58,16 +59,16 @@ class Verify2FA(BaseModel):
 
 
 def ok(values, message, status_code):
-    return JSONResponse(
-        status_code=status_code,
-        content={"value": values, "message": message, "success_code": status_code},
+    """Legacy function - use create_success_response instead"""
+    return create_success_response(
+        message=message, data=values, status_code=status_code
     )
 
 
-def formatError(values, message, status_code):
-    return JSONResponse(
-        status_code=status_code,
-        content={"value": values, "message": message, "error_code": status_code},
+def formatError(message, status_code):
+    """Legacy function - use create_error_response instead"""
+    return create_error_response(
+        message=message, error_code=status_code, status_code=status_code
     )
 
 
