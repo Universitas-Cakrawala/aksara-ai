@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Eye, EyeOff, User, Lock } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
+import { DUMMY_MODE, DUMMY_USERS } from '@/services/dummyData';
 
 const loginSchema = z.object({
   username: z.string().min(3, 'Username minimal 3 karakter'),
@@ -54,6 +55,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Dummy credentials info - hanya tampil dalam mode dummy */}
+        {DUMMY_MODE && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                  Mode Dummy - Gunakan kredensial berikut:
+                </p>
+                <div className="space-y-1 text-blue-700 dark:text-blue-300">
+                  {DUMMY_USERS.slice(0, 3).map((user) => (
+                    <div key={user.id} className="font-mono text-xs">
+                      {user.username} / {user.password}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
