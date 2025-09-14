@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi, type LoginRequest, type RegisterRequest } from '@/services/api';
+import { mockAuthApi } from '@/services/mockApi';
+import { DUMMY_MODE } from '@/services/dummyData';
 
 interface User {
   id: string;
@@ -49,14 +51,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
       };
       
-      const response = await authApi.login(loginData);
+      // Pilih API berdasarkan mode (dummy atau real)
+      const response = DUMMY_MODE 
+        ? await mockAuthApi.login(loginData)
+        : await authApi.login(loginData);
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
       setUser(response.user);
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.response?.data?.message || 'Login gagal');
+      // Untuk dummy mode, error message langsung dari mockApi
+      const errorMessage = DUMMY_MODE 
+        ? error.message 
+        : (error.response?.data?.message || 'Login gagal');
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -72,14 +81,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
       };
       
-      const response = await authApi.register(registerData);
+      // Pilih API berdasarkan mode (dummy atau real)
+      const response = DUMMY_MODE 
+        ? await mockAuthApi.register(registerData)
+        : await authApi.register(registerData);
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
       setUser(response.user);
     } catch (error: any) {
       console.error('Register error:', error);
-      throw new Error(error.response?.data?.message || 'Registrasi gagal');
+      // Untuk dummy mode, error message langsung dari mockApi
+      const errorMessage = DUMMY_MODE 
+        ? error.message 
+        : (error.response?.data?.message || 'Registrasi gagal');
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }

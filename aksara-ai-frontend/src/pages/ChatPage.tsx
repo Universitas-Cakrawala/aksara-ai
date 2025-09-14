@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
+import { mockChatApi } from '@/services/mockApi';
+import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
 
 interface Message {
   id: string;
@@ -13,18 +15,52 @@ interface Message {
 }
 
 const ChatPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
-      sender: 'ai',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
+
+  // Load initial messages
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        if (DUMMY_MODE) {
+          // Load dummy chat history
+          const dummyMessages = await mockChatApi.getChatHistory();
+          const formattedMessages = dummyMessages.map((msg: DummyMessage) => ({
+            id: msg.id,
+            content: msg.text,
+            sender: msg.sender,
+            timestamp: msg.timestamp
+          }));
+          setMessages(formattedMessages);
+        } else {
+          // Default welcome message untuk mode production
+          setMessages([{
+            id: '1',
+            content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+            sender: 'ai',
+            timestamp: new Date(),
+          }]);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        // Fallback ke welcome message
+        setMessages([{
+          id: '1',
+          content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+          sender: 'ai',
+          timestamp: new Date(),
+        }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChatHistory();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,20 +81,48 @@ const ChatPage: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: Message = {
+    try {
+      if (DUMMY_MODE) {
+        // Gunakan dummy AI response
+        const aiResponse = await mockChatApi.sendMessage(currentMessage);
+        const aiMessage: Message = {
+          id: aiResponse.id,
+          content: aiResponse.text,
+          sender: 'ai',
+          timestamp: aiResponse.timestamp,
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        // Fallback untuk mode production (bisa diganti dengan real API call)
+        setTimeout(() => {
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: `Terima kasih atas pertanyaan Anda: "${currentMessage}". Saya akan membantu Anda dengan topik literasi dan akademik. Apakah ada hal spesifik yang ingin Anda diskusikan?`,
+            sender: 'ai',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, aiMessage]);
+          setIsTyping(false);
+        }, 1500);
+        return; // Early return untuk mode production
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Fallback response jika ada error
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `Terima kasih atas pertanyaan Anda: "${inputMessage}". Saya akan membantu Anda dengan topik literasi dan akademik. Apakah ada hal spesifik yang ingin Anda diskusikan?`,
+        content: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
         sender: 'ai',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -99,7 +163,15 @@ const ChatPage: React.FC = () => {
         {/* Messages */}
         <Card className="flex-1 mb-4">
           <CardContent className="p-4 h-full overflow-hidden">
-            <div className="h-full overflow-y-auto space-y-4 pr-2">
+            {isLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-sm text-muted-foreground">Memuat chat...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full overflow-y-auto space-y-4 pr-2">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -155,6 +227,7 @@ const ChatPage: React.FC = () => {
               
               <div ref={messagesEndRef} />
             </div>
+            )}
           </CardContent>
         </Card>
 
