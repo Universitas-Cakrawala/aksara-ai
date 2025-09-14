@@ -1,15 +1,19 @@
 from starlette import status
 from starlette.responses import JSONResponse
+from src.common.schemas import create_success_response, create_error_response
 
 
 def ok(values, message):
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"value": values, "message": message}
+    """Legacy function - use create_success_response instead"""
+    return create_success_response(
+        message=message, data=values, status_code=status.HTTP_200_OK
     )
 
 
 def formatError(values, message):
-    return JSONResponse(
+    """Legacy function - use create_error_response instead"""
+    return create_error_response(
+        message=message,
+        error_code=status.HTTP_400_BAD_REQUEST,
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"value": values, "message": message},
     )

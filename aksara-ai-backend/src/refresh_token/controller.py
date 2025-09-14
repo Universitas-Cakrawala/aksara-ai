@@ -4,6 +4,7 @@ from typing import Dict
 from src.auth.handler import (
     refresh_access_token as external_refresh_access_token,
 )  # Fungsi refresh token dari modul eksternal
+from src.common.schemas import create_success_response, create_error_response
 
 
 class TokenHandler:
@@ -13,18 +14,25 @@ class TokenHandler:
         refresh_token: str
 
     @staticmethod
-    async def refresh_access_token(refresh_token: str) -> Dict[str, str]:
+    async def refresh_access_token(refresh_token: str):
         # Panggil fungsi `refresh_access_token` dari modul `src.auth.handler`
 
         new_access_token = external_refresh_access_token(refresh_token)
         if new_access_token is None:
-            raise HTTPException(
-                status_code=401, detail="Invalid or expired refresh token"
+            return create_error_response(
+                message="Invalid or expired refresh token",
+                error_code=401,
+                status_code=401,
             )
 
-        # Return response in the required format
-        return {
-            "value": {"access_token": new_access_token, "refresh_token": refresh_token},
-            "message": "Successfully refreshed access token!",
-            "success_code": 200,
+        # Return response in the standardized format
+        token_data = {
+            "access_token": new_access_token["access_token"],
+            "refresh_token": new_access_token["refresh_token"],
         }
+
+        return create_success_response(
+            message="Successfully refreshed access token!",
+            data=token_data,
+            status_code=200,
+        )

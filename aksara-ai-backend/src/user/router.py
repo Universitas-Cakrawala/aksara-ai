@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, status
 from src.user.controller import UserController
 from src.auth.auth import JWTBearer, OptionalJWTBearer
 from typing import Optional
@@ -12,13 +12,18 @@ from src.user.schemas import (
     PasswordUpdate,
 )
 from src.utils.pagination import PageParams
+from src.common.response_examples import ResponseExamples
 
 
 routerUser = APIRouter()
 
 
-@routerUser.post("/register")
-async def action(
+@routerUser.post(
+    "/register",
+    responses=ResponseExamples.user_register_responses(),
+    summary="Register a new user",
+)
+async def register_user(
     request: UserCreate,
     authorization: Optional[str] = Header(None),
     token: Optional[str] = Depends(OptionalJWTBearer),
@@ -29,24 +34,38 @@ async def action(
     return await UserController.register(request, authorization, db)
 
 
-@routerUser.post("/login")
-async def action(
+@routerUser.post(
+    "/login",
+    responses=ResponseExamples.user_login_responses(),
+    summary="Login user",
+)
+async def login_user(
     request: UserLogin,
     db: Session = Depends(get_db),
 ):
     return await UserController.login(request, db)
 
 
-@routerUser.get("/profile", dependencies=[Depends(JWTBearer())])
-async def action(
+@routerUser.get(
+    "/profile",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.user_profile_responses(),
+    summary="Get user profile",
+)
+async def get_user_profile(
     authorization: str = Header(...),
     db: Session = Depends(get_db),
 ):
     return await UserController.profile(authorization, db)
 
 
-@routerUser.delete("/{id}", dependencies=[Depends(JWTBearer())])
-async def action(
+@routerUser.delete(
+    "/{id}",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.user_delete_responses(),
+    summary="Delete user",
+)
+async def delete_user(
     id: str,
     authorization: str = Header(...),
     db: Session = Depends(get_db),
@@ -54,8 +73,13 @@ async def action(
     return await UserController.delete(id, authorization, db)
 
 
-@routerUser.put("/{id}", dependencies=[Depends(JWTBearer())])
-async def action(
+@routerUser.put(
+    "/{id}",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.user_update_responses(),
+    summary="Update user",
+)
+async def update_user(
     request: UserUpdate,
     id: str,
     authorization: str = Header(...),
@@ -64,8 +88,13 @@ async def action(
     return await UserController.update(id, request, authorization, db)
 
 
-@routerUser.put("/update-password/{id}", dependencies=[Depends(JWTBearer())])
-async def action(
+@routerUser.put(
+    "/update-password/{id}",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.user_password_update_responses(),
+    summary="Update user password",
+)
+async def update_user_password(
     request: PasswordUpdate,
     id: str,
     authorization: str = Header(...),
