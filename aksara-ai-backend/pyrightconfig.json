@@ -1,0 +1,23 @@
+{
+    "include": [
+        "src",
+        "."
+    ],
+    "exclude": [
+        "**/__pycache__",
+        ".venv"
+    ],
+    "venv": ".venv",
+    "venvPath": ".",
+    "pythonVersion": "3.12",
+    "pythonPlatform": "Linux",
+    "executionEnvironments": [
+        {
+            "root": "src"
+        }
+    ],
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "autoImportCompletions": true,
+    "indexing": true
+}

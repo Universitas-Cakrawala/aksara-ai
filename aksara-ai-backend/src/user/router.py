@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header
 from src.user.controller import UserController
 from src.auth.auth import JWTBearer, OptionalJWTBearer
 from typing import Optional

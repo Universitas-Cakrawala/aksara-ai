@@ -1,8 +1,3 @@
-from decouple import config
-import itertools
-import requests
-
-
 def safe_float(value, default=0.0):
     return float(value) if value is not None else default
 

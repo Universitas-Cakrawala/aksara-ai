@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Dict
 from src.auth.handler import (
     refresh_access_token as external_refresh_access_token,
 )  # Fungsi refresh token dari modul eksternal
@@ -14,7 +13,6 @@ class TokenHandler:
 
     @staticmethod
     async def refresh_access_token(refresh_token: str):
-        # Panggil fungsi `refresh_access_token` dari modul `src.auth.handler`
 
         new_access_token = external_refresh_access_token(refresh_token)
         if new_access_token is None:
