@@ -75,7 +75,7 @@ Ensure you have the following software installed on your local machine:
 ### Accessing the Application
 
 - Once the server is running, you can access the API documentation at:
-  - OpenAPI: [Swagger Documentation](http://127.0.0.1:8000/docs)
+  - OpenAPI: [Swagger Documentation](http://127.0.0.1:8000/api/docs)
 
 ### Default Credentials
 
