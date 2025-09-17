@@ -2,7 +2,6 @@
 """
 Seed script untuk mengisi data awal database
 """
-import os
 import sys
 from pathlib import Path
 
@@ -11,9 +10,8 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy.orm import Session
-from src.config.postgres import engine, SessionLocal
+from src.config.postgres import SessionLocal
 from src.user.models import User, UserProfile
-import uuid
 from datetime import datetime
 import hashlib
 
@@ -41,8 +39,6 @@ def create_admin_user(db: Session):
         id_user=user.id,
         nama_lengkap="Administrator",
         email="admin@aksara.ai",
-        tipe_akun="ADMIN",
-        role="SUPER_ADMIN",
         created_by="system",
         updated_by="system",
         created_date=datetime.now(),

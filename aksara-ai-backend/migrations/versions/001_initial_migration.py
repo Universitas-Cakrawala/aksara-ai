@@ -42,8 +42,6 @@ def upgrade() -> None:
         sa.Column("id_user", sa.String(), nullable=False),
         sa.Column("nama_lengkap", sa.String(), nullable=False),
         sa.Column("email", sa.String(), nullable=False),
-        sa.Column("tipe_akun", sa.String(), nullable=False),
-        sa.Column("role", sa.String(), nullable=False),
         sa.Column("deleted", sa.Boolean(), nullable=False, default=False),
         sa.Column("created_by", sa.String(), nullable=False),
         sa.Column("created_date", sa.DateTime(), nullable=True),

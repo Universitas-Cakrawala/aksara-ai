@@ -15,9 +15,7 @@ class PasswordUpdateByUsername(BaseModel):
 
 class UserSearchParams(BaseModel):
     username: Optional[str] = Query(None)
-    role: Optional[str] = Query(None)
     nama_lengkap: Optional[str] = Query(None)
-    is_active: Optional[bool] = Query(None)
 
 
 class UserGenerateOtpParams(BaseModel):
@@ -97,7 +95,6 @@ def mapUserData(user_data):
             "id_user": str(profile.id_user),
             "nama_lengkap": profile.nama_lengkap,
             "email": profile.email,
-            "tipe_akun": profile.tipe_akun,
             "created_by": profile.created_by,
             "updated_by": profile.updated_by,
             "created_date": serialize_date(profile.created_date),
@@ -126,7 +123,6 @@ def mapUserProfileData(user_data):
             "id_user": str(profile.id_user),
             "nama_lengkap": profile.nama_lengkap,
             "email": profile.email,
-            "tipe_akun": profile.tipe_akun,
             "created_by": profile.created_by,
             "updated_by": profile.updated_by,
             "created_date": serialize_date(profile.created_date),
@@ -155,7 +151,6 @@ def transformUsers(results: List[tuple]) -> List[Dict]:
                 "id_user": str(profile.id_user),
                 "nama_lengkap": profile.nama_lengkap,
                 "email": profile.email,
-                "tipe_akun": profile.tipe_akun,
                 "created_by": profile.created_by,
                 "updated_by": profile.updated_by,
                 "created_date": serialize_date(profile.created_date),

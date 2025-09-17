@@ -101,7 +101,6 @@ class ResponseExamples:
                         "id_user": "uuid-string",
                         "nama_lengkap": "Administrator",
                         "email": "admin@aksara.ai",
-                        "tipe_akun": "ADMIN",
                         "created_by": "system",
                         "updated_by": "system",
                         "created_date": "2024-01-01",

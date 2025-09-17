@@ -26,8 +26,6 @@ class UserProfile(SQLModel, table=True):
     id_user: str = Field(foreign_key="user.id", unique=True)
     nama_lengkap: str
     email: str
-    tipe_akun: str
-    role: str
     deleted: bool = Field(default=False)
     created_by: str
     created_date: Optional[datetime.datetime] = None

@@ -122,8 +122,6 @@ class UserController:
                     id_user=id_user,
                     nama_lengkap=nama_lengkap,
                     email=email,
-                    tipe_akun="user",
-                    role="user",
                     created_by=existing_username,
                     created_date=CURRENT_DATETIME,
                     updated_by=None,

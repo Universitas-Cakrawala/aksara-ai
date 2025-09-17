@@ -99,8 +99,6 @@ make clean            # Clean cache files
 - id_user (UUID, FK to user.id, Unique)
 - nama_lengkap (String)
 - email (String)
-- tipe_akun (String)
-- role (String)
 - deleted (Boolean, Default: False)
 - created_by, updated_by (String)
 - created_date, updated_date (DateTime)
