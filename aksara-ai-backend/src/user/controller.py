@@ -7,7 +7,7 @@ from src.user.models import (
 from src.config.postgres import get_db
 from sqlalchemy.orm import Session
 from src.user.utils import get_password_hash, verify_password
-from src.auth.handler import get_current_user
+from src.auth.handler import get_current_user, signJWT
 from src.user.schemas import (
     ok,
     formatError,
@@ -368,20 +368,21 @@ class UserController:
                     detail="password must be at least 8 characters!",
                 )
 
-            userQuery = (
-                db.query(User, UserProfile)
-                .join(UserProfile, UserProfile.id_user == User.id)
-                .filter(User.username == username, User.deleted == False)
+            user = (
+                db.query(User)
+                .filter(
+                    User.username == username,
+                    User.deleted == False,
+                    User.is_active == True,
+                )
                 .first()
             )
 
-            if userQuery is None:
+            if user is None:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="user not found!",
                 )
-
-            user = userQuery
 
             if user is None:
                 raise HTTPException(
@@ -404,10 +405,19 @@ class UserController:
             if verifyPasword == False:
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
-                    detail="password yang di input salah!",
+                    detail="password atau username yang di input salah!",
                 )
 
-            return ok(transformerUserLoginUser, "Successfully Login!", HTTP_ACCEPTED)
+            # Sign JWT tokens (access + refresh) and return them without exposing password
+            tokens = signJWT(transformerUserLoginUser["id"])
+            response_data = {
+                "id": transformerUserLoginUser["id"],
+                "username": user.username,
+                "access_token": tokens.get("access_token"),
+                "refresh_token": tokens.get("refresh_token"),
+            }
+
+            return ok(response_data, "Successfully Login!", HTTP_ACCEPTED)
         except HTTPException as e:
             db.rollback()
             return formatError(e.detail, e.status_code)

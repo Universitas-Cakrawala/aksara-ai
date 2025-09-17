@@ -45,8 +45,6 @@ class PasswordUpdate(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-    recaptcha_token: Optional[str] = None
-    auth: Optional[str] = None
 
 
 class Verify2FA(BaseModel):
