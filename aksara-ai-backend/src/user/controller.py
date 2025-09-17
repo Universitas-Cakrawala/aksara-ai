@@ -1,6 +1,5 @@
 from fastapi import HTTPException, Depends
 from starlette.responses import JSONResponse
-from typing import Optional
 from src.user.models import (
     User,
     UserProfile,
@@ -38,24 +37,9 @@ class UserController:
     @staticmethod
     async def register(
         request: UserCreate,
-        authorization: str,
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
-            userData: Optional[User] = None
-            userId: Optional[str] = None
-            if authorization:
-                token = authorization.split("Bearer")[1].strip()
-                userId = get_current_user(token)
-                if userId:
-                    userData = (
-                        db.query(User)
-                        .filter(
-                            User.id == userId,
-                        )
-                        .first()
-                    )
-
             username = request.username.strip()
             password = request.password.strip()
             nama_lengkap = request.nama_lengkap.strip()
@@ -90,10 +74,6 @@ class UserController:
                     detail=f"Email : {email} already exists!",
                 )
 
-            userData = (
-                db.query(User).filter(User.id == userId, User.deleted == False).first()
-            )
-
             existing_user = db.query(User).filter(User.username == username).first()
             if existing_user and existing_user.deleted == False:
                 raise HTTPException(
@@ -104,40 +84,32 @@ class UserController:
             hashPassword = get_password_hash(password)
 
             id_user = uuid.uuid4().hex
-            if userData:
-                existing_username = userData.username
-                userMap = User(
-                    id=id_user,
-                    username=username,
-                    password=hashPassword,
-                    is_active=True,
-                    created_by=existing_username,
-                    created_date=CURRENT_DATETIME,
-                    updated_by=None,
-                )
+            userMap = User(
+                id=id_user,
+                username=username,
+                password=hashPassword,
+                is_active=True,
+                created_by=username,
+                created_date=CURRENT_DATETIME,
+                updated_by=username,
+            )
 
-                idProfile = uuid.uuid4().hex
-                profileMap = UserProfile(
-                    id=idProfile,
-                    id_user=id_user,
-                    nama_lengkap=nama_lengkap,
-                    email=email,
-                    created_by=existing_username,
-                    created_date=CURRENT_DATETIME,
-                    updated_by=None,
-                )
+            idProfile = uuid.uuid4().hex
+            profileMap = UserProfile(
+                id=idProfile,
+                id_user=id_user,
+                nama_lengkap=nama_lengkap,
+                email=email,
+                created_by=username,
+                created_date=CURRENT_DATETIME,
+                updated_by=username,
+            )
 
-                db.add(userMap)
-                db.add(profileMap)
-                db.commit()
-
-                transformer = actionTransformUser(userMap, profileMap)
-                return ok(transformer, "Successfully Create User!", HTTP_CREATED)
-            else:
-                raise HTTPException(
-                    status_code=HTTP_BAD_REQUEST,
-                    detail="You can register as super admin without login or login and than add new user except user admin!",
-                )
+            db.add(userMap)
+            db.add(profileMap)
+            db.commit()
+            transformer = actionTransformUser(userMap, profileMap)
+            return ok(transformer, "Successfully Create User!", HTTP_CREATED)
         except HTTPException as e:
             db.rollback()
             return formatError(e.detail, e.status_code)

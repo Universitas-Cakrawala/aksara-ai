@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, Header
 from src.user.controller import UserController
-from src.auth.auth import JWTBearer, OptionalJWTBearer
-from typing import Optional
+from src.auth.auth import JWTBearer
 from src.config.postgres import get_db
 from sqlalchemy.orm import Session
-from src.auth.handler import decodeJWT
 from src.user.schemas import (
     UserCreate,
     UserUpdate,
@@ -24,13 +22,9 @@ routerUser = APIRouter()
 )
 async def register_user(
     request: UserCreate,
-    authorization: str = Header(...),
-    token: Optional[str] = Depends(OptionalJWTBearer),
     db: Session = Depends(get_db),
 ):
-    if token:
-        decodeJWT(token)
-    return await UserController.register(request, authorization, db)
+    return await UserController.register(request, db)
 
 
 @routerUser.post(

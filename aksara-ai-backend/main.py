@@ -57,8 +57,8 @@ def create_app() -> FastAPI:
         version="1.0.0",
         title="RESTful API Aksara AI Backend",
         description="Swagger documentation RESTful API for Aksara AI Backend",
-        docs_url="/api/docs",  # 👈 Ganti path Swagger UI
-        openapi_url="/api/docs/openapi.json",  # 👈 Ganti path OpenAPI JSON
+        docs_url="/docs",  # 👈 Ganti path Swagger UI
+        openapi_url="/docs/openapi.json",  # 👈 Ganti path OpenAPI JSON
     )
 
     # Add custom exception handler
@@ -82,7 +82,7 @@ def create_app() -> FastAPI:
         response: Response = await call_next(request)
 
         # Longgarkan hanya untuk Swagger UI
-        if request.url.path.startswith("/api/docs") or request.url.path.startswith(
+        if request.url.path.startswith("/docs") or request.url.path.startswith(
             "/endpoints/docs"
         ):
             response.headers["Content-Security-Policy"] = (
