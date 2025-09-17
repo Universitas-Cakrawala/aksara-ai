@@ -13,10 +13,7 @@ try:
     from src.config.postgres import SQLALCHEMY_DATABASE_URL
 except Exception as e:
     # Fallback untuk development/testing
-    SQLALCHEMY_DATABASE_URL = "postgresql://user:password@localhost:5432/dbname"
-
-from src.user.models import User, UserProfile
-from src.refresh_token.models import RefreshToken
+    SQLALCHEMY_DATABASE_URL: str = "postgresql://user:password@localhost:5432/dbname"
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,5 +1,6 @@
 from fastapi import HTTPException, Depends
 from starlette.responses import JSONResponse
+from typing import Optional
 from src.user.models import (
     User,
     UserProfile,
@@ -29,9 +30,7 @@ from src.constants import (
     HTTP_NOT_FOUND,
     HTTP_UNAUTHORIZED,
 )
-from datetime import date, datetime
 from src.utils.validate import validateEmail
-from sqlalchemy import or_
 import uuid
 
 
@@ -43,13 +42,19 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
-            userData: any = None
-            userId: str = None
+            userData: Optional[User] = None
+            userId: Optional[str] = None
             if authorization:
                 token = authorization.split("Bearer")[1].strip()
                 userId = get_current_user(token)
                 if userId:
-                    userData = db.query(User).filter(User.id == userId).first()
+                    userData = (
+                        db.query(User)
+                        .filter(
+                            User.id == userId,
+                        )
+                        .first()
+                    )
 
             username = request.username.strip()
             password = request.password.strip()
@@ -108,6 +113,7 @@ class UserController:
                     is_active=True,
                     created_by=existing_username,
                     created_date=CURRENT_DATETIME,
+                    updated_by=None,
                 )
 
                 idProfile = uuid.uuid4().hex
@@ -116,8 +122,11 @@ class UserController:
                     id_user=id_user,
                     nama_lengkap=nama_lengkap,
                     email=email,
+                    tipe_akun="user",
+                    role="user",
                     created_by=existing_username,
                     created_date=CURRENT_DATETIME,
+                    updated_by=None,
                 )
 
                 db.add(userMap)
@@ -173,7 +182,7 @@ class UserController:
                 .filter(
                     UserProfile.email == request.email,
                     User.id != id,
-                    UserProfile.deleted.is_(False),
+                    UserProfile.deleted == False,
                 )
                 .first()
             )
@@ -324,7 +333,10 @@ class UserController:
 
             userQuery = (
                 db.query(User, UserProfile)
-                .join(UserProfile, UserProfile.id_user == id)
+                .join(
+                    UserProfile,
+                    UserProfile.id_user == id,
+                )
                 .filter(
                     User.deleted == False,
                     UserProfile.deleted == False,
@@ -450,7 +462,10 @@ class UserController:
 
             user = (
                 db.query(User, UserProfile)
-                .join(UserProfile, UserProfile.id_user == User.id)
+                .join(
+                    UserProfile,
+                    UserProfile.id_user == User.id,
+                )
                 .filter(
                     UserProfile.deleted == False,
                     User.deleted == False,
@@ -494,12 +509,6 @@ class UserController:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You are not logged in!",
-                )
-
-            if not request:
-                raise HTTPException(
-                    status_code=HTTP_BAD_REQUEST,
-                    detail="Request body cannot be empty!",
                 )
 
             # Fetch the current user data from the database

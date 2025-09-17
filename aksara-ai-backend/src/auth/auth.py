@@ -9,8 +9,8 @@ from src.constants import (
     HTTP_UNAUTHORIZED,
 )
 
-JWT_SECRET = config("JWT_SECRET")
-JWT_ALGORITHM = config("JWT_ALGORITHM")
+JWT_SECRET: str = str(config("JWT_SECRET"))
+JWT_ALGORITHM: str = str(config("JWT_ALGORITHM"))
 
 
 class JWTBearer(HTTPBearer):
@@ -140,7 +140,15 @@ class RefreshTokenBearer(HTTPBearer):
     def verify_jwt(self, token: str) -> dict:
         try:
             decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            return decoded_token if decoded_token["expires"] >= time.time() else None
+            return (
+                decoded_token
+                if decoded_token["expires"] >= time.time()
+                else {
+                    "value": "error",
+                    "message": "Token has expired",
+                    "error_code": HTTP_UNAUTHORIZED,
+                }
+            )
         except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=HTTP_UNAUTHORIZED, detail="Token has expired"

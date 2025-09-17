@@ -4,8 +4,8 @@ import jwt
 import time
 from src.constants import HTTP_UNAUTHORIZED
 
-JWT_SECRET = config("JWT_SECRET")
-JWT_ALGORITHM = config("JWT_ALGORITHM")
+JWT_SECRET: str = str(config("JWT_SECRET"))
+JWT_ALGORITHM: str = str(config("JWT_ALGORITHM"))
 
 ACCESS_TOKEN_EXPIRE_TIME_ONE_HOUR = 60 * 60  # 1 jam
 ACCESS_TOKEN_EXPIRE_TIME_FIVE_MINUTES = 5 * 60  # 5 menit
@@ -41,7 +41,7 @@ def signJWTLimitedAPI(payload: dict) -> str:
     return access_token
 
 
-def signJWT2(payload: Dict, type="access") -> Dict[str, str]:
+def signJWT2(payload: Dict, type="access") -> str:
     access_token_expiration = time.time() + ACCESS_TOKEN_EXPIRE_TIME_ONE_DAY
     payload["expires"] = access_token_expiration
     payload["type"] = type
@@ -50,18 +50,38 @@ def signJWT2(payload: Dict, type="access") -> Dict[str, str]:
     return encodedJWT
 
 
-def decodeJWT2(token: str) -> Optional[Dict]:
+def decodeJWT2(token: str) -> dict:
     try:
         if token is None or token == "":
-            return None
+            return {
+                "value": "error",
+                "message": "Token is empty",
+                "error_code": HTTP_UNAUTHORIZED,
+            }
 
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         # Periksa apakah token sudah kadaluwarsa
-        return decoded_token if decoded_token["expires"] >= time.time() else None
+        return (
+            decoded_token
+            if decoded_token["expires"] >= time.time()
+            else {
+                "value": "error",
+                "message": "Token has expired",
+                "error_code": HTTP_UNAUTHORIZED,
+            }
+        )
     except jwt.ExpiredSignatureError:
-        return None
+        return {
+            "value": "error",
+            "message": "Token has expired",
+            "error_code": HTTP_UNAUTHORIZED,
+        }
     except jwt.InvalidTokenError:
-        return None
+        return {
+            "value": "error",
+            "message": "Invalid token",
+            "error_code": HTTP_UNAUTHORIZED,
+        }
 
 
 def decodeJWT(token: str) -> dict:
@@ -70,23 +90,31 @@ def decodeJWT(token: str) -> dict:
             return {
                 "value": "error",
                 "message": "Token is empty",
-                "success_code": HTTP_UNAUTHORIZED,
+                "error_code": HTTP_UNAUTHORIZED,
             }
 
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         # Periksa apakah token sudah kadaluwarsa
-        return decoded_token if decoded_token["expires"] >= time.time() else None
+        return (
+            decoded_token
+            if decoded_token["expires"] >= time.time()
+            else {
+                "value": "error",
+                "message": "Token has expired",
+                "error_code": HTTP_UNAUTHORIZED,
+            }
+        )
     except jwt.ExpiredSignatureError:
         return {
             "value": "error",
             "message": "Token has expired",
-            "success_code": HTTP_UNAUTHORIZED,
+            "error_code": HTTP_UNAUTHORIZED,
         }
     except jwt.InvalidTokenError:
         return {
             "value": "error",
             "message": "Invalid token",
-            "success_code": HTTP_UNAUTHORIZED,
+            "error_code": HTTP_UNAUTHORIZED,
         }
 
 

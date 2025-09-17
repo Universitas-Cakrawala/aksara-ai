@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 # URL koneksi database dari environment variables
-SQLALCHEMY_DATABASE_URL = config("DATABASE_CONN")
+SQLALCHEMY_DATABASE_URL: str = str(config("DATABASE_CONN"))
 
 print("DB URLNYA:", SQLALCHEMY_DATABASE_URL)
 

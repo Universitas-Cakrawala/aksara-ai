@@ -5,8 +5,7 @@ import uuid
 
 
 class RefreshToken(SQLModel, table=True):
-    __tablename__ = "refresh_tokens"
-
+    __tablename__ = "refresh_token"
     id: str = Field(
         default_factory=lambda: str(uuid.uuid4()), primary_key=True, index=True
     )

@@ -1,5 +1,7 @@
 """
-Common response schemas for consistent API responses across the application.
+Common response sch    message    err    message: str = Field(..., description="Error message")r_code: int = Field(..., description="HTTP error code") str = Field(
+        ..., description="Success message"
+    )s for consistent API responses across the application.
 These schemas define the standardized format for success and error responses.
 """
 
@@ -21,23 +23,21 @@ class BaseResponse(BaseModel, Generic[T]):
 class SuccessResponse(BaseResponse[T]):
     """Standard success response format"""
 
-    message: str = Field(
-        ..., description="Success message", example="Operation completed successfully"
-    )
+    message: str = Field(..., description="Success message")
     data: Optional[T] = Field(default=None, description="Response data")
 
 
 class ErrorDetail(BaseModel):
     """Error detail structure"""
 
-    error_code: int = Field(..., description="HTTP error code", example=400)
+    error_code: int = Field(..., description="HTTP error code")
     details: Optional[str] = Field(default=None, description="Additional error details")
 
 
 class ErrorResponse(BaseResponse):
     """Standard error response format"""
 
-    message: str = Field(..., description="Error message", example="An error occurred")
+    message: str = Field(..., description="Error message")
     error: ErrorDetail = Field(..., description="Error details")
 
 

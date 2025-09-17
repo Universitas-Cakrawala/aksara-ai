@@ -2,7 +2,6 @@
 """
 Validation script untuk memastikan migration berjalan dengan benar
 """
-import os
 import sys
 from pathlib import Path
 
@@ -11,8 +10,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy import text
-from sqlalchemy.orm import Session
-from src.config.postgres import engine, SessionLocal
+from src.config.postgres import SessionLocal
 
 
 def check_database_connection():

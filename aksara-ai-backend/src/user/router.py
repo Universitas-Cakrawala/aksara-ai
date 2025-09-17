@@ -11,7 +11,6 @@ from src.user.schemas import (
     UserLogin,
     PasswordUpdate,
 )
-from src.utils.pagination import PageParams
 from src.common.response_examples import ResponseExamples
 
 
@@ -25,7 +24,7 @@ routerUser = APIRouter()
 )
 async def register_user(
     request: UserCreate,
-    authorization: Optional[str] = Header(None),
+    authorization: str = Header(...),
     token: Optional[str] = Depends(OptionalJWTBearer),
     db: Session = Depends(get_db),
 ):

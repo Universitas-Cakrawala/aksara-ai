@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from src.utils.date import serialize_date
 from fastapi import Query
 from typing import Optional
-from datetime import date
 from src.common.schemas import create_success_response, create_error_response
 
 

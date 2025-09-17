@@ -4,8 +4,8 @@ from pydantic import BaseModel, conint
 class PageParams(BaseModel):
     """Request query params for paginated API."""
 
-    page: conint(ge=1) = 1  # type: ignore
-    size: conint(ge=1) = 10  # type: ignore
+    page: conint(ge=1) = 1
+    size: conint(ge=1) = 10
 
 
 def MapPagination(data, totalItems, pageParams):
