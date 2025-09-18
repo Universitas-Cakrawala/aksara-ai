@@ -130,7 +130,14 @@ class UserController:
                     detail="Authorization token is missing!",
                 )
 
-            token = authorization.split("Bearer")[1].strip()
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
             userId = get_current_user(token)
             if userId is None:
                 raise HTTPException(
@@ -271,7 +278,20 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
-            token = authorization.split("Bearer")[1].strip()
+            if not authorization:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Authorization token is missing!",
+                )
+
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
             userId = get_current_user(token)
 
             if userId is None:
@@ -430,7 +450,20 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
-            token = authorization.split("Bearer")[1].strip()
+            if not authorization:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Authorization token is missing!",
+                )
+
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
             userId = get_current_user(token)
 
             if userId is None:
@@ -482,7 +515,14 @@ class UserController:
                     detail="Authorization token is missing!",
                 )
 
-            token = authorization.split("Bearer")[1].strip()
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
             userId = get_current_user(token)
             if userId is None:
                 raise HTTPException(

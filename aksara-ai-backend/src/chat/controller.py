@@ -20,15 +20,20 @@ class ChatController:
     ):
         """Receive a chat request, forward it to Gemini, and return structured response."""
         try:
-            # Auth - JWTBearer already extracts the token for us
             if not authorization:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
 
-            # authorization is already the token string from JWTBearer
-            token = authorization
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
             userId = get_current_user(token)
 
             if userId is None:

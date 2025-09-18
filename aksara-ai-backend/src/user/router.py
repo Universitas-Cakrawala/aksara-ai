@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends
 from src.user.controller import UserController
 from src.auth.auth import JWTBearer
 from src.config.postgres import get_db
@@ -46,7 +46,7 @@ async def login_user(
     summary="Get user profile",
 )
 async def get_user_profile(
-    authorization: str = Header(...),
+    authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     return await UserController.profile(authorization, db)
@@ -60,7 +60,7 @@ async def get_user_profile(
 )
 async def delete_user(
     id: str,
-    authorization: str = Header(...),
+    authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     return await UserController.delete(id, authorization, db)
@@ -75,7 +75,7 @@ async def delete_user(
 async def update_user(
     request: UserUpdate,
     id: str,
-    authorization: str = Header(...),
+    authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     return await UserController.update(id, request, authorization, db)
@@ -90,7 +90,7 @@ async def update_user(
 async def update_user_password(
     request: PasswordUpdate,
     id: str,
-    authorization: str = Header(...),
+    authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     return await UserController.updatePasswordById(id, request, authorization, db)
