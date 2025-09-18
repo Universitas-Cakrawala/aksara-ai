@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from src.auth.handler import (
     refresh_access_token as external_refresh_access_token,
 )  # Fungsi refresh token dari modul eksternal
-from src.common.schemas import create_success_response, create_error_response
+from src.constants import HTTP_UNAUTHORIZED
+from src.utils.helper import ok, formatError
 
 
 class TokenHandler:
@@ -16,10 +17,9 @@ class TokenHandler:
 
         new_access_token = external_refresh_access_token(refresh_token)
         if new_access_token is None:
-            return create_error_response(
+            return formatError(
                 message="Invalid or expired refresh token",
-                error_code=401,
-                status_code=401,
+                status_code=HTTP_UNAUTHORIZED,
             )
 
         # Return response in the standardized format
@@ -28,8 +28,8 @@ class TokenHandler:
             "refresh_token": new_access_token["refresh_token"],
         }
 
-        return create_success_response(
-            message="Successfully refreshed access token!",
-            data=token_data,
+        return ok(
+            values=token_data,
+            message="Access token refreshed successfully",
             status_code=200,
         )

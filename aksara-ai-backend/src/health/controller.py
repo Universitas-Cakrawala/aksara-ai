@@ -1,7 +1,6 @@
 from starlette.responses import JSONResponse
-from src.health.schemas import ok
-from src.health.schemas import formatError
-from src.constants import HTTP_INTERNAL_SERVER_ERROR
+from src.utils.helper import ok, formatError
+from src.constants import HTTP_INTERNAL_SERVER_ERROR, HTTP_OK
 
 
 class HealthController:
@@ -12,6 +11,6 @@ class HealthController:
                 "success": True,
             }
 
-            return ok(response, "Server running successfully!")
+            return ok(response, "Server running successfully!", status_code=HTTP_OK)
         except Exception as e:
             return formatError(str(e), HTTP_INTERNAL_SERVER_ERROR)
