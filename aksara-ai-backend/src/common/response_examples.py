@@ -226,6 +226,39 @@ class ResponseExamples:
             ),
         }
 
+    # ==================== Chat ENDPOINT RESPONSES ====================
+    @staticmethod
+    def chat_responses() -> Dict:
+        """Response examples for chat endpoint"""
+        return {
+            200: ResponseExamples.success_response(
+                "Successfully generated chat response",
+                {
+                    "id": "uuid-string",
+                    "model": "gemini-2.5-flash-preview-05-20",
+                    "output": [
+                        {
+                            "role": "assistant",
+                            "content": "This is a sample response from the AI model.",
+                        }
+                    ],
+                    "metadata": {
+                        "response_time": "2024-01-01T00:00:00",
+                        "usage": {"prompt_tokens": 10, "completion_tokens": 20},
+                    },
+                },
+            ),
+            400: ResponseExamples.error_response(
+                "Invalid request payload", 400, "Bad Request"
+            ),
+            401: ResponseExamples.error_response(
+                "Authentication required", 401, "Unauthorized"
+            ),
+            500: ResponseExamples.error_response(
+                "Internal server error", 500, "Internal Server Error"
+            ),
+        }
+
     # ==================== COMMON ERROR RESPONSES ====================
 
     @staticmethod

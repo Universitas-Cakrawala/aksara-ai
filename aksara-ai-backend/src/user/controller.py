@@ -8,9 +8,8 @@ from src.config.postgres import get_db
 from sqlalchemy.orm import Session
 from src.user.utils import get_password_hash, verify_password
 from src.auth.handler import get_current_user, signJWT
+from src.utils.helper import ok, formatError
 from src.user.schemas import (
-    ok,
-    formatError,
     actionTransformUserLogin,
     actionTransformUser,
     mapUserProfileData,
@@ -29,7 +28,7 @@ from src.constants import (
     HTTP_NOT_FOUND,
     HTTP_UNAUTHORIZED,
 )
-from src.utils.validate import validateEmail
+from src.utils.helper import validateEmail
 import uuid
 
 

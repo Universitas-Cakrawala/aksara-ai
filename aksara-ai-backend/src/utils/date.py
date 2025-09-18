@@ -1,11 +1,16 @@
 from datetime import date, datetime
+import pytz
 
 
 def serialize_date(d):
     return d.isoformat() if isinstance(d, date) else None
 
 
-TODAY = datetime.today().date()
+def format_date(date_str):
+    dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+    jakarta_tz = pytz.timezone("Asia/Jakarta")
+    local_dt = dt.astimezone(jakarta_tz)
+    return local_dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 MOTNTH_MAPPING = {

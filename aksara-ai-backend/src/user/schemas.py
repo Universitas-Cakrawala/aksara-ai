@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from src.utils.date import serialize_date
 from fastapi import Query
 from typing import Optional
-from src.common.schemas import create_success_response, create_error_response
 
 
 class PasswordUpdateByUsername(BaseModel):
@@ -50,20 +49,6 @@ class UserLogin(BaseModel):
 class Verify2FA(BaseModel):
     token: str
     otp: str
-
-
-def ok(values, message, status_code):
-    """Legacy function - use create_success_response instead"""
-    return create_success_response(
-        message=message, data=values, status_code=status_code
-    )
-
-
-def formatError(message, status_code):
-    """Legacy function - use create_error_response instead"""
-    return create_error_response(
-        message=message, error_code=status_code, status_code=status_code
-    )
 
 
 def actionTransformUser(userValue, profileValue):
