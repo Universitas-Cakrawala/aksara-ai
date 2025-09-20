@@ -1,24 +1,6 @@
 from typing import List, Dict
 from pydantic import BaseModel
 from src.utils.date import serialize_date
-from fastapi import Query
-from typing import Optional
-
-
-class PasswordUpdateByUsername(BaseModel):
-    username: str
-    old_password: str
-    confirm_new_password: str
-    new_password: str
-
-
-class UserSearchParams(BaseModel):
-    username: Optional[str] = Query(None)
-    nama_lengkap: Optional[str] = Query(None)
-
-
-class UserGenerateOtpParams(BaseModel):
-    token: str
 
 
 class UserCreate(BaseModel):
@@ -44,11 +26,6 @@ class PasswordUpdate(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-
-
-class Verify2FA(BaseModel):
-    token: str
-    otp: str
 
 
 def actionTransformUser(userValue, profileValue):
