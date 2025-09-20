@@ -33,3 +33,6 @@ python-multipart==0.0.18
 
 # Type annotations (for older Python versions)
 typing_extensions==4.13.2
+
+# google generative ai
+google-generative-ai==0.3.0
