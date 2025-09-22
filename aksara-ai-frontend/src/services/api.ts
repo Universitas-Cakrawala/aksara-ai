@@ -51,6 +51,7 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   access_token: string;
+  refresh_token: string;
   user: {
     id: string;
     username: string;
@@ -61,17 +62,39 @@ export interface AuthResponse {
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await api.post('/user/login', data);
-    return response.data;
+    const response = await api.post('/users/login', data);
+    // Backend returns data wrapped in data field with message
+    const result = response.data.data;
+    return {
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: {
+        id: result.id,
+        username: result.username,
+        nama_lengkap: '', // Will be filled from profile
+        email: '' // Will be filled from profile
+      }
+    };
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await api.post('/user/register', data);
-    return response.data;
+    const response = await api.post('/users/register', data);
+    // Backend now returns tokens along with user data after successful registration
+    const result = response.data.data;
+    return {
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: {
+        id: result.id,
+        username: result.username,
+        nama_lengkap: result.nama_lengkap,
+        email: result.email
+      }
+    };
   },
 
   getProfile: async () => {
-    const response = await api.post('/user/profile');
+    const response = await api.get('/users/profile');
     return response.data;
   },
 };
