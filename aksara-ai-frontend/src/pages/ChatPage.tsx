@@ -27,7 +27,6 @@ const ChatPage: React.FC = () => {
     const loadChatHistory = async () => {
       try {
         if (DUMMY_MODE) {
-          // Load dummy chat history
           const dummyMessages = await mockChatApi.getChatHistory();
           const formattedMessages = dummyMessages.map((msg: DummyMessage) => ({
             id: msg.id,
@@ -37,7 +36,6 @@ const ChatPage: React.FC = () => {
           }));
           setMessages(formattedMessages);
         } else {
-          // Default welcome message untuk mode production
           setMessages([{
             id: '1',
             content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
@@ -47,7 +45,6 @@ const ChatPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading chat history:', error);
-        // Fallback ke welcome message
         setMessages([{
           id: '1',
           content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
@@ -87,7 +84,6 @@ const ChatPage: React.FC = () => {
 
     try {
       if (DUMMY_MODE) {
-        // Gunakan dummy AI response
         const aiResponse = await mockChatApi.sendMessage(currentMessage);
         const aiMessage: Message = {
           id: aiResponse.id,
@@ -97,7 +93,6 @@ const ChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        // Fallback untuk mode production (bisa diganti dengan real API call)
         setTimeout(() => {
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -108,11 +103,10 @@ const ChatPage: React.FC = () => {
           setMessages(prev => [...prev, aiMessage]);
           setIsTyping(false);
         }, 1500);
-        return; // Early return untuk mode production
+        return;
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Fallback response jika ada error
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
@@ -132,6 +126,24 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // ===========================
+  // Logout dengan konfirmasi + fade out + alert
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Apakah Anda yakin ingin logout?');
+    if (confirmLogout) {
+      // Fade out chat container
+      document.getElementById('chat-container')?.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+
+      setTimeout(() => {
+        logout();              // panggil fungsi logout dari context
+        setMessages([]);       // bersihkan chat
+        setInputMessage('');   // reset input
+        alert('Berhasil logout!');
+      }, 500); // delay 500ms untuk efek fade out
+    }
+  };
+  // ===========================
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -150,7 +162,7 @@ const ChatPage: React.FC = () => {
               <User className="h-4 w-4" />
               <span className="text-sm">{user?.nama_lengkap}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={logout}>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Keluar
             </Button>
@@ -159,7 +171,7 @@ const ChatPage: React.FC = () => {
       </div>
 
       {/* Chat Container */}
-      <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
+      <div id="chat-container" className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
         {/* Messages */}
         <Card className="flex-1 mb-4">
           <CardContent className="p-4 h-full overflow-hidden">
@@ -172,61 +184,61 @@ const ChatPage: React.FC = () => {
               </div>
             ) : (
               <div className="h-full overflow-y-auto space-y-4 pr-2">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  {message.sender === 'ai' && (
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {message.sender === 'ai' && (
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === 'user'
+                            ? 'text-blue-100'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                    {message.sender === 'user' && (
+                      <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex gap-3 justify-start">
                     <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                       <Bot className="h-4 w-4 text-white" />
                     </div>
-                  )}
-                  <div
-                    className={`max-w-[70%] p-3 rounded-lg ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        message.sender === 'user'
-                          ? 'text-blue-100'
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                  {message.sender === 'user' && (
-                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-gray-600" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex gap-3 justify-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="bg-muted p-3 rounded-lg">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="bg-muted p-3 rounded-lg">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
             )}
           </CardContent>
         </Card>
