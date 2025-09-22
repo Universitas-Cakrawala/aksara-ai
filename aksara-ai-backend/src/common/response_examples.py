@@ -221,6 +221,7 @@ class ResponseExamples:
                 {
                     "id": "uuid-string",
                     "model": "gemini-2.5-flash-preview-05-20",
+                    "input": "Hello, how are you?",
                     "output": [
                         {
                             "role": "assistant",
@@ -228,8 +229,8 @@ class ResponseExamples:
                         }
                     ],
                     "metadata": {
-                        "response_time": "2024-01-01T00:00:00",
-                        "usage": {"prompt_tokens": 10, "completion_tokens": 20},
+                        "temperature": "0.0",
+                        "max_tokens": "512",
                     },
                 },
             ),
