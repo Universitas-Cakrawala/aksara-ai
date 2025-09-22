@@ -26,6 +26,8 @@ class ChatController:
                     detail="Authorization token is missing!",
                 )
 
+            print("Authorization:", authorization)
+
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
                     token = authorization.split("Bearer", 1)[1].strip()
