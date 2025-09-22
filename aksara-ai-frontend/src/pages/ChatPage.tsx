@@ -126,15 +126,23 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  // Logout dengan konfirmasi dan bersihkan chat
+  // ===========================
+  // Logout dengan konfirmasi + fade out + alert
   const handleLogout = () => {
     const confirmLogout = window.confirm('Apakah Anda yakin ingin logout?');
     if (confirmLogout) {
-      logout();
-      setMessages([]); // bersihkan chat
-      setInputMessage('');
+      // Fade out chat container
+      document.getElementById('chat-container')?.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+
+      setTimeout(() => {
+        logout();              // panggil fungsi logout dari context
+        setMessages([]);       // bersihkan chat
+        setInputMessage('');   // reset input
+        alert('Berhasil logout!');
+      }, 500); // delay 500ms untuk efek fade out
     }
   };
+  // ===========================
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -163,7 +171,7 @@ const ChatPage: React.FC = () => {
       </div>
 
       {/* Chat Container */}
-      <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
+      <div id="chat-container" className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
         {/* Messages */}
         <Card className="flex-1 mb-4">
           <CardContent className="p-4 h-full overflow-hidden">
@@ -176,61 +184,61 @@ const ChatPage: React.FC = () => {
               </div>
             ) : (
               <div className="h-full overflow-y-auto space-y-4 pr-2">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${
-                    message.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  {message.sender === 'ai' && (
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {message.sender === 'ai' && (
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === 'user'
+                            ? 'text-blue-100'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                    {message.sender === 'user' && (
+                      <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex gap-3 justify-start">
                     <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                       <Bot className="h-4 w-4 text-white" />
                     </div>
-                  )}
-                  <div
-                    className={`max-w-[70%] p-3 rounded-lg ${
-                      message.sender === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p
-                      className={`text-xs mt-1 ${
-                        message.sender === 'user'
-                          ? 'text-blue-100'
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                  {message.sender === 'user' && (
-                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-gray-600" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex gap-3 justify-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="bg-muted p-3 rounded-lg">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="bg-muted p-3 rounded-lg">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
             )}
           </CardContent>
         </Card>
