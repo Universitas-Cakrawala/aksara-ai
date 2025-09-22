@@ -1,5 +1,4 @@
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.config.postgres import get_db

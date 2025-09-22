@@ -107,8 +107,19 @@ class UserController:
             db.add(userMap)
             db.add(profileMap)
             db.commit()
-            transformer = actionTransformUser(userMap, profileMap)
-            return ok(transformer, "Successfully Create User!", HTTP_CREATED)
+            
+            # Auto-login user after successful registration by generating tokens
+            tokens = signJWT(str(userMap.id))
+            response_data = {
+                "id": str(userMap.id),
+                "username": userMap.username,
+                "nama_lengkap": profileMap.nama_lengkap,
+                "email": profileMap.email,
+                "access_token": tokens.get("access_token"),
+                "refresh_token": tokens.get("refresh_token"),
+            }
+            
+            return ok(response_data, "Successfully Create User!", HTTP_CREATED)
         except HTTPException as e:
             db.rollback()
             return formatError(e.detail, e.status_code)

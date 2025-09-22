@@ -58,13 +58,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
+      // Simpan refresh token jika ada
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
       setUser(response.user);
     } catch (error: any) {
       console.error('Login error:', error);
       // Untuk dummy mode, error message langsung dari mockApi
-      const errorMessage = DUMMY_MODE 
-        ? error.message 
-        : (error.response?.data?.message || 'Login gagal');
+      let errorMessage = 'Login gagal';
+      if (DUMMY_MODE) {
+        errorMessage = error.message;
+      } else {
+        // Backend error format: { detail: "error message" }
+        errorMessage = error.response?.data?.detail || error.response?.data?.message || 'Login gagal';
+      }
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -88,13 +96,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
+      // Simpan refresh token jika ada
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
       setUser(response.user);
     } catch (error: any) {
       console.error('Register error:', error);
       // Untuk dummy mode, error message langsung dari mockApi
-      const errorMessage = DUMMY_MODE 
-        ? error.message 
-        : (error.response?.data?.message || 'Registrasi gagal');
+      let errorMessage = 'Registrasi gagal';
+      if (DUMMY_MODE) {
+        errorMessage = error.message;
+      } else {
+        // Backend error format: { detail: "error message" }
+        errorMessage = error.response?.data?.detail || error.response?.data?.message || 'Registrasi gagal';
+      }
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -103,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('userData');
     setUser(null);
   };
