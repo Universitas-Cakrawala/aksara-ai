@@ -27,7 +27,6 @@ const ChatPage: React.FC = () => {
     const loadChatHistory = async () => {
       try {
         if (DUMMY_MODE) {
-          // Load dummy chat history
           const dummyMessages = await mockChatApi.getChatHistory();
           const formattedMessages = dummyMessages.map((msg: DummyMessage) => ({
             id: msg.id,
@@ -37,7 +36,6 @@ const ChatPage: React.FC = () => {
           }));
           setMessages(formattedMessages);
         } else {
-          // Default welcome message untuk mode production
           setMessages([{
             id: '1',
             content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
@@ -47,7 +45,6 @@ const ChatPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading chat history:', error);
-        // Fallback ke welcome message
         setMessages([{
           id: '1',
           content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
@@ -87,7 +84,6 @@ const ChatPage: React.FC = () => {
 
     try {
       if (DUMMY_MODE) {
-        // Gunakan dummy AI response
         const aiResponse = await mockChatApi.sendMessage(currentMessage);
         const aiMessage: Message = {
           id: aiResponse.id,
@@ -97,7 +93,6 @@ const ChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        // Fallback untuk mode production (bisa diganti dengan real API call)
         setTimeout(() => {
           const aiMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -108,11 +103,10 @@ const ChatPage: React.FC = () => {
           setMessages(prev => [...prev, aiMessage]);
           setIsTyping(false);
         }, 1500);
-        return; // Early return untuk mode production
+        return;
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Fallback response jika ada error
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
@@ -129,6 +123,16 @@ const ChatPage: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  // Logout dengan konfirmasi dan bersihkan chat
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Apakah Anda yakin ingin logout?');
+    if (confirmLogout) {
+      logout();
+      setMessages([]); // bersihkan chat
+      setInputMessage('');
     }
   };
 
@@ -150,7 +154,7 @@ const ChatPage: React.FC = () => {
               <User className="h-4 w-4" />
               <span className="text-sm">{user?.nama_lengkap}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={logout}>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Keluar
             </Button>
