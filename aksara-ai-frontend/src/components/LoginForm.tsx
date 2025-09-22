@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Eye, EyeOff, User, Lock, Info } from 'lucide-react';
+import { Eye, EyeOff, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
-import { DUMMY_MODE, DUMMY_USERS } from '@/services/dummyData';
 
 const loginSchema = z.object({
   username: z.string().min(3, 'Username minimal 3 karakter'),
@@ -53,7 +52,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg">
+    <Card className="w-full max-w-md mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Masuk ke Aksara AI</CardTitle>
         <CardDescription className="text-center text-muted-foreground">
@@ -62,27 +61,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       </CardHeader>
 
       <CardContent>
-        {/* Informasi mode dummy */}
-        {DUMMY_MODE && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg animate-fadeIn">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  Mode Dummy - Gunakan kredensial berikut:
-                </p>
-                <div className="space-y-1 text-blue-700 dark:text-blue-300">
-                  {DUMMY_USERS.slice(0, 3).map((user) => (
-                    <div key={user.id} className="font-mono text-xs">
-                      {user.username} / {user.password}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Username */}
           <div className="space-y-2">
@@ -93,7 +71,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
                 id="username"
                 type="text"
                 placeholder="Masukkan username"
-                className="pl-10"
+                className="pl-10 focus:ring-2 focus:ring-blue-500 transition"
                 {...register('username')}
               />
             </div>
@@ -113,14 +91,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
                 id="password"
                 type={tampilkanPassword ? 'text' : 'password'}
                 placeholder="Masukkan kata sandi"
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 focus:ring-2 focus:ring-blue-500 transition"
                 {...register('password')}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent transition-transform duration-200"
                 onClick={() => setTampilkanPassword(!tampilkanPassword)}
                 title={tampilkanPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
               >
@@ -143,8 +121,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             <input
               type="checkbox"
               id="remember"
-              className="accent-primary"
+              className="accent-primary cursor-pointer"
               {...register('remember')}
+              title="Ceklis jika ingin tetap login di perangkat ini"
             />
             <Label htmlFor="remember" className="text-sm cursor-pointer">
               Ingat saya
@@ -161,7 +140,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           {/* Tombol masuk */}
           <Button
             type="submit"
-            className="w-full flex justify-center items-center"
+            className="w-full flex justify-center items-center transition-transform duration-150 hover:scale-105"
             disabled={isLoading}
           >
             {isLoading && (
@@ -177,7 +156,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             Belum punya akun?{' '}
             <Button
               variant="link"
-              className="p-0 h-auto font-normal"
+              className="p-0 h-auto font-normal hover:underline"
               onClick={onToggleMode}
             >
               Daftar di sini
