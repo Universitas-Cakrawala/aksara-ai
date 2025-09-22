@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.config.postgres import get_db
@@ -24,8 +25,6 @@ class ChatController:
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
-
-            print("Authorization:", authorization)
 
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
