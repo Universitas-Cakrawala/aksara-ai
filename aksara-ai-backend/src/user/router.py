@@ -52,20 +52,6 @@ async def get_user_profile(
     return await UserController.profile(authorization, db)
 
 
-@routerUser.delete(
-    "/{id}",
-    dependencies=[Depends(JWTBearer())],
-    responses=ResponseExamples.user_delete_responses(),
-    summary="Delete user",
-)
-async def delete_user(
-    id: str,
-    authorization: str = Depends(JWTBearer()),
-    db: Session = Depends(get_db),
-):
-    return await UserController.delete(id, authorization, db)
-
-
 @routerUser.put(
     "/{id}",
     dependencies=[Depends(JWTBearer())],

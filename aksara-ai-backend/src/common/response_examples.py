@@ -135,21 +135,6 @@ class ResponseExamples:
         }
 
     @staticmethod
-    def user_delete_responses() -> Dict:
-        """Response examples for delete user endpoint"""
-        return {
-            200: ResponseExamples.success_response(
-                "Profile soft deleted successfully!"
-            ),
-            401: ResponseExamples.error_response(
-                "You are not logged in!", 401, "Unauthorized"
-            ),
-            404: ResponseExamples.error_response(
-                "User with id {id} not found!", 404, "User not found"
-            ),
-        }
-
-    @staticmethod
     def user_password_update_responses() -> Dict:
         """Response examples for update password endpoint"""
         return {
