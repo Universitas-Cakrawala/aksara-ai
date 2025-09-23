@@ -43,6 +43,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser(data.nama_lengkap, data.email, data.username, data.password);
+      // Bisa tambahkan toast notifikasi sukses di sini
     } catch (error: any) {
       setError('root', {
         message: error.message || 'Terjadi kesalahan saat mendaftar',
@@ -51,17 +52,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Daftar ke Aksara AI
-        </CardTitle>
-        <CardDescription className="text-center">
+    <Card className="w-full max-w-md mx-auto shadow-xl rounded-xl">
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl font-bold text-center">Daftar ke Aksara AI</CardTitle>
+        <CardDescription className="text-center text-muted-foreground">
           Buat akun baru untuk mengakses chat AI
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Nama Lengkap */}
           <div className="space-y-2">
             <Label htmlFor="nama_lengkap">Nama Lengkap</Label>
             <div className="relative">
@@ -69,16 +70,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
               <Input
                 id="nama_lengkap"
                 type="text"
-                placeholder="Nama lengkap"
+                placeholder="Masukkan nama lengkap"
                 className="pl-10"
                 {...register('nama_lengkap')}
               />
             </div>
             {errors.nama_lengkap && (
-              <p className="text-sm text-destructive">{errors.nama_lengkap.message}</p>
+              <p className="text-sm text-destructive animate-fadeIn">{errors.nama_lengkap.message}</p>
             )}
           </div>
 
+          {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <div className="relative">
@@ -92,10 +94,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
               />
             </div>
             {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
+              <p className="text-sm text-destructive animate-fadeIn">{errors.email.message}</p>
             )}
           </div>
 
+          {/* Username */}
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <div className="relative">
@@ -109,18 +112,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
               />
             </div>
             {errors.username && (
-              <p className="text-sm text-destructive">{errors.username.message}</p>
+              <p className="text-sm text-destructive animate-fadeIn">{errors.username.message}</p>
             )}
           </div>
 
+          {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Kata Sandi</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
+                placeholder="Kata sandi"
                 className="pl-10 pr-10"
                 {...register('password')}
               />
@@ -130,27 +134,25 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 size="icon"
                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
               </Button>
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p className="text-sm text-destructive animate-fadeIn">{errors.password.message}</p>
             )}
           </div>
 
+          {/* Konfirmasi Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+            <Label htmlFor="confirmPassword">Konfirmasi Kata Sandi</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Konfirmasi password"
+                placeholder="Konfirmasi kata sandi"
                 className="pl-10 pr-10"
                 {...register('confirmPassword')}
               />
@@ -160,38 +162,33 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
                 size="icon"
                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                title={showConfirmPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
               >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
+                {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
               </Button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-destructive animate-fadeIn">{errors.confirmPassword.message}</p>
             )}
           </div>
 
+          {/* Error Root */}
           {errors.root && (
-            <p className="text-sm text-destructive text-center">
-              {errors.root.message}
-            </p>
+            <p className="text-sm text-destructive text-center animate-fadeIn">{errors.root.message}</p>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          {/* Submit Button */}
+          <Button type="submit" className="w-full flex justify-center items-center" disabled={isLoading}>
+            {isLoading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />}
             {isLoading ? 'Mendaftar...' : 'Daftar'}
           </Button>
         </form>
 
+        {/* Navigasi Login */}
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Sudah punya akun?{' '}
-            <Button
-              variant="link"
-              className="p-0 h-auto font-normal"
-              onClick={onToggleMode}
-            >
+            <Button variant="link" className="p-0 h-auto font-normal" onClick={onToggleMode}>
               Masuk di sini
             </Button>
           </p>
