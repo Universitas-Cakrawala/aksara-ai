@@ -4,48 +4,70 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* 🎨 Warna dasar */
+    --background: 40 30% 96%; /* abu-abu pastel lembut */
+    --foreground: 24 20% 15%; /* coklat gelap, teks utama */
+
+    --card: 40 30% 96%;
+    --card-foreground: 24 20% 15%;
+
+    --popover: 40 30% 96%;
+    --popover-foreground: 24 20% 15%;
+
+    /* ✨ Mustard pastel */
+    --primary: 39 70% 55%; /* orange mustard pastel */
+    --primary-foreground: 40 30% 96%;
+
+    /* 🩶 Abu-abu lembut */
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 24 20% 15%;
+
+    --muted: 0 0% 92%;
+    --muted-foreground: 24 5% 45%;
+
+    /* Accent untuk gradasi */
+    --accent: 39 75% 65%; /* mustard lebih terang */
+    --accent-foreground: 24 20% 15%;
+
+    /* Danger / destructive */
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 40 30% 96%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 39 70% 55%; /* mustard glow */
+
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 24 15% 10%;
+    --foreground: 39 75% 85%;
+
+    --card: 24 15% 12%;
+    --card-foreground: 39 75% 85%;
+
+    --popover: 24 15% 12%;
+    --popover-foreground: 39 75% 85%;
+
+    --primary: 39 75% 65%; /* mustard pastel glow */
+    --primary-foreground: 24 15% 10%;
+
+    --secondary: 0 0% 25%;
+    --secondary-foreground: 39 75% 85%;
+
+    --muted: 0 0% 30%;
+    --muted-foreground: 39 15% 70%;
+
+    --accent: 39 80% 60%;
+    --accent-foreground: 24 15% 10%;
+
+    --destructive: 0 65% 40%;
+    --destructive-foreground: 39 75% 90%;
+
+    --border: 0 0% 30%;
+    --input: 0 0% 30%;
+    --ring: 39 75% 65%;
   }
 }
 
@@ -56,7 +78,14 @@
   body {
     @apply bg-background text-foreground;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
+    line-height: 1.6;
     font-weight: 400;
+
+    /* 🌅 Gradasi background */
+    background: linear-gradient(
+      135deg,
+      hsl(39 70% 55% / 0.15),
+      hsl(0 0% 90% / 0.5)
+    );
   }
 }
