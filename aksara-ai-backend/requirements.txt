@@ -36,3 +36,4 @@ typing_extensions==4.13.2
 
 # google generative ai
 google-genai
+google-generativeai

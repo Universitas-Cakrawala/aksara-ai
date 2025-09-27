@@ -41,7 +41,7 @@ migrate-up:
 migrate-down:
 	@echo "⬇️  Rolling back migration..."
 	@if [ -z "$(REV)" ]; then \
-		echo "❌ Please specify revision: make migrate-down REV=001_initial"; \
+		echo "❌ Please specify revision: make migrate-down REV=001_initial_migrate"; \
 	else \
 		python migrate.py downgrade $(REV); \
 		echo "✅ Migration rolled back to $(REV)!"; \

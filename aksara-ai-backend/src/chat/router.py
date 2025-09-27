@@ -22,3 +22,31 @@ async def generate_chat_response(
     db: Session = Depends(get_db),
 ):
     return await ChatController.generate_chat_response(request, authorization, db)
+
+
+@routerChat.get(
+    "/histories",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.chat_histories_responses(),
+    summary="Get chat histories",
+)
+async def get_chat_histories(
+    authorization: str = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    return await ChatController.get_chat_histories(authorization, db)
+
+
+# get one chat history by id
+@routerChat.get(
+    "/histories/{history_id}",
+    dependencies=[Depends(JWTBearer())],
+    responses=ResponseExamples.chat_history_responses(),
+    summary="Get chat history by ID",
+)
+async def get_chat_history_by_id(
+    history_id: str,
+    authorization: str = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    return await ChatController.get_chat_history_by_id(history_id, authorization, db)
