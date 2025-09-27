@@ -97,6 +97,24 @@ export const authApi = {
     const response = await api.get('/users/profile');
     return response.data;
   },
+
+  updateProfile: async (userId: string, data: {
+    username: string;
+    nama_lengkap: string;
+    email: string;
+  }) => {
+    const response = await api.put(`/users/${userId}`, data);
+    return response.data;
+  },
+
+  updatePassword: async (userId: string, data: {
+    old_password: string;
+    new_password: string;
+    confirm_new_password: string;
+  }) => {
+    const response = await api.put(`/users/update-password/${userId}`, data);
+    return response.data;
+  },
 };
 
 export interface ChatRequest {

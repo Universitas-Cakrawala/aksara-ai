@@ -15,6 +15,7 @@ from src.user.schemas import (
     mapUserProfileData,
     UserCreate,
     UserUpdate,
+    ProfileUpdate,
     UserLogin,
     PasswordUpdate,
 )
@@ -273,6 +274,136 @@ class UserController:
             return ok(
                 "",
                 f"User with name {request.nama_lengkap} update successfully!",
+                HTTP_OK,
+            )
+        except HTTPException as e:
+            db.rollback()
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            db.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)
+
+    @staticmethod
+    async def updateProfile(
+        id: str,
+        request: ProfileUpdate,
+        authorization: str,
+        db: Session = Depends(get_db),
+    ) -> JSONResponse:
+        try:
+            if not authorization:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Authorization token is missing!",
+                )
+
+            if isinstance(authorization, str) and "Bearer" in authorization:
+                try:
+                    token = authorization.split("Bearer", 1)[1].strip()
+                except Exception:
+                    token = authorization
+            else:
+                token = authorization
+
+            userId = get_current_user(token)
+            if userId is None:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="You are not logged in!",
+                )
+
+            # Validate that the user is updating their own profile
+            if userId != id:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="You can only update your own profile!",
+                )
+
+            # Validate email format
+            isEmailValid = validateEmail(request.email)
+            if not isEmailValid:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Email tidak valid!",
+                )
+
+            # Check if email already exists (excluding current user)
+            existing_email = (
+                db.query(UserProfile, User)
+                .join(User, User.id == UserProfile.id_user)
+                .filter(
+                    UserProfile.email == request.email,
+                    User.id != id,
+                    UserProfile.deleted == False,
+                )
+                .first()
+            )
+
+            if existing_email is not None:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail=f"Email : {request.email} already exists!",
+                )
+
+            # Check if username already exists (excluding current user)
+            existing_username = (
+                db.query(User)
+                .filter(
+                    User.username == request.username.strip(),
+                    User.id != id,
+                    User.deleted == False,
+                )
+                .first()
+            )
+
+            if existing_username is not None:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail=f"Username : {request.username} already exists!",
+                )
+
+            # Get current user and profile
+            user = db.query(User).filter(User.id == id, User.deleted == False).first()
+            if not user:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail=f"User with id {id} not found!",
+                )
+
+            profile = (
+                db.query(UserProfile)
+                .filter(UserProfile.id_user == id, UserProfile.deleted == False)
+                .first()
+            )
+            if not profile:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail="User profile not found!",
+                )
+
+            # Update user data
+            user_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            if request.username.strip() != user.username:
+                user_updates["username"] = request.username.strip()
+
+            if user_updates:
+                db.query(User).filter(User.id == id).update(user_updates)
+
+            # Update profile data
+            profile_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            if request.nama_lengkap != profile.nama_lengkap:
+                profile_updates["nama_lengkap"] = request.nama_lengkap
+            if request.email != profile.email:
+                profile_updates["email"] = request.email
+
+            if profile_updates:
+                db.query(UserProfile).filter(UserProfile.id == profile.id).update(profile_updates)
+
+            db.commit()
+
+            return ok(
+                "",
+                f"Profile updated successfully!",
                 HTTP_OK,
             )
         except HTTPException as e:
