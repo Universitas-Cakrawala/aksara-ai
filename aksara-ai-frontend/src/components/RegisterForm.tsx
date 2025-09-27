@@ -188,7 +188,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Sudah punya akun?{' '}
-            <Button variant="link" className="p-0 h-auto font-normal" onClick={onToggleMode}>
+            <Button variant="link" className="p-0 h-auto text-blue-500 font-normal hover:font-bold" onClick={onToggleMode}>
               Masuk di sini
             </Button>
           </p>
