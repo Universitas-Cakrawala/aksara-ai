@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.ip_middleware import AddClientIPMiddleware
 from src.health.router import routerHealth
 from src.user.router import routerUser
-# from src.chat.router import routerChat  # Comment out for now
+from src.chat.router import routerChat
 from src.refresh_token.router import routerRefreshToken
 from src.utils.allowed_middleware import (
     ALLOWED_METHODS,
@@ -115,7 +115,7 @@ def create_app() -> FastAPI:
         routerRefreshToken, prefix="/refresh-token", tags=["Refresh Token"]
     )
     router_api_v1.include_router(routerUser, prefix="/users", tags=["Users"])
-    # router_api_v1.include_router(routerChat, prefix="/chat", tags=["Chat"])  # Comment out for now
+    router_api_v1.include_router(routerChat, prefix="/chat", tags=["Chat"])
 
     app.include_router(router_api_v1)
     return app

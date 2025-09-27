@@ -71,8 +71,8 @@ export const authApi = {
       user: {
         id: result.id,
         username: result.username,
-        nama_lengkap: '', // Will be filled from profile
-        email: '' // Will be filled from profile
+        nama_lengkap: result.nama_lengkap,
+        email: result.email
       }
     };
   },
@@ -96,6 +96,30 @@ export const authApi = {
   getProfile: async () => {
     const response = await api.get('/users/profile');
     return response.data;
+  },
+};
+
+export interface ChatRequest {
+  input: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
+export interface ChatResponse {
+  id: string;
+  model: string;
+  input: string;
+  output: string;
+  metadata: {
+    temperature: number;
+    max_tokens: number;
+  };
+}
+
+export const chatApi = {
+  sendMessage: async (data: ChatRequest): Promise<ChatResponse> => {
+    const response = await api.post('/chat/message', data);
+    return response.data.data;
   },
 };
 

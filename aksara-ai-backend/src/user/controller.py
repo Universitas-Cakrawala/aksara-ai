@@ -318,12 +318,6 @@ class UserController:
                     detail="user not found!",
                 )
 
-            if user is None:
-                raise HTTPException(
-                    status_code=HTTP_NOT_FOUND,
-                    detail="user not found!",
-                )
-
             if user.is_active == False:
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
@@ -342,11 +336,25 @@ class UserController:
                     detail="password atau username yang di input salah!",
                 )
 
+            profile = (
+                db.query(UserProfile)
+                .filter(UserProfile.id_user == user.id, UserProfile.deleted == False)
+                .first()
+            )
+
+            if profile is None:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail="User profile not found!",
+                )
+
             # Sign JWT tokens (access + refresh) and return them without exposing password
             tokens = signJWT(transformerUserLoginUser["id"])
             response_data = {
                 "id": transformerUserLoginUser["id"],
                 "username": user.username,
+                "nama_lengkap": profile.nama_lengkap,
+                "email": profile.email,
                 "access_token": tokens.get("access_token"),
                 "refresh_token": tokens.get("refresh_token"),
             }

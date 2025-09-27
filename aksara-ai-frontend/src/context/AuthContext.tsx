@@ -33,14 +33,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('userData');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('userData');
+
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+
+          if (!parsedUser.nama_lengkap || !parsedUser.email) {
+            const profileResponse = DUMMY_MODE
+              ? await mockAuthApi.getProfile()
+              : await authApi.getProfile();
+            const profileData = profileResponse.data?.profile;
+            const userResponse = profileResponse.data?.user;
+
+            if (profileData && userResponse) {
+              const enrichedUser = {
+                id: userResponse.id,
+                username: userResponse.username,
+                nama_lengkap: profileData.nama_lengkap,
+                email: profileData.email,
+              };
+              localStorage.setItem('userData', JSON.stringify(enrichedUser));
+              setUser(enrichedUser);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to parse stored user data:', error);
+          localStorage.removeItem('userData');
+        }
+      } else {
+        try {
+          const profileResponse = DUMMY_MODE
+            ? await mockAuthApi.getProfile()
+            : await authApi.getProfile();
+          const profileData = profileResponse.data?.profile;
+          const userResponse = profileResponse.data?.user;
+
+          if (profileData && userResponse) {
+            const enrichedUser = {
+              id: userResponse.id,
+              username: userResponse.username,
+              nama_lengkap: profileData.nama_lengkap,
+              email: profileData.email,
+            };
+            localStorage.setItem('userData', JSON.stringify(enrichedUser));
+            setUser(enrichedUser);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch profile during initialization:', error);
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -62,6 +117,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.refresh_token) {
         localStorage.setItem('refresh_token', response.refresh_token);
       }
+
+      // Ensure we have complete profile details (nama_lengkap & email)
+      try {
+        const profileResponse = DUMMY_MODE
+          ? await mockAuthApi.getProfile()
+          : await authApi.getProfile();
+        const profileData = profileResponse.data?.profile;
+        const userData = profileResponse.data?.user;
+
+        if (profileData && userData) {
+          const enrichedUser = {
+            id: userData.id,
+            username: userData.username,
+            nama_lengkap: profileData.nama_lengkap,
+            email: profileData.email,
+          };
+          localStorage.setItem('userData', JSON.stringify(enrichedUser));
+          setUser(enrichedUser);
+          return;
+        }
+      } catch (profileError) {
+        console.warn('Failed to fetch profile after login:', profileError);
+      }
+
       setUser(response.user);
     } catch (error: any) {
       console.error('Login error:', error);
@@ -100,6 +179,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.refresh_token) {
         localStorage.setItem('refresh_token', response.refresh_token);
       }
+
+      // Setelah registrasi, pastikan data profil disimpan lengkap
+      try {
+        const profileResponse = DUMMY_MODE
+          ? await mockAuthApi.getProfile()
+          : await authApi.getProfile();
+        const profileData = profileResponse.data?.profile;
+        const userData = profileResponse.data?.user;
+
+        if (profileData && userData) {
+          const enrichedUser = {
+            id: userData.id,
+            username: userData.username,
+            nama_lengkap: profileData.nama_lengkap,
+            email: profileData.email,
+          };
+          localStorage.setItem('userData', JSON.stringify(enrichedUser));
+          setUser(enrichedUser);
+          return;
+        }
+      } catch (profileError) {
+        console.warn('Failed to fetch profile after registration:', profileError);
+      }
+
       setUser(response.user);
     } catch (error: any) {
       console.error('Register error:', error);

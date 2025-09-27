@@ -29,6 +29,7 @@ export const mockAuthApi = {
     
     return {
       access_token: fakeToken,
+      refresh_token: `${fakeToken}_refresh`,
       user: {
         id: user.id,
         username: user.username,
@@ -70,6 +71,7 @@ export const mockAuthApi = {
     
     return {
       access_token: fakeToken,
+      refresh_token: `${fakeToken}_refresh`,
       user: {
         id: newUser.id,
         username: newUser.username,
@@ -88,7 +90,20 @@ export const mockAuthApi = {
       throw new Error('User not authenticated');
     }
     
-    return JSON.parse(userData);
+    const parsedUser = JSON.parse(userData);
+    return {
+      data: {
+        user: {
+          id: parsedUser.id,
+          username: parsedUser.username,
+        },
+        profile: {
+          id_user: parsedUser.id,
+          nama_lengkap: parsedUser.nama_lengkap,
+          email: parsedUser.email,
+        },
+      },
+    };
   }
 };
 
