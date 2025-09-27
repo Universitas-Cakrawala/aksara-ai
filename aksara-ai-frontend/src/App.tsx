@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import AuthPage from '@/pages/AuthPage';
 import ChatPage from '@/pages/ChatPage';
+import ProfilePage from '@/pages/ProfilePage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const AppRoutes: React.FC = () => {
@@ -19,6 +20,22 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

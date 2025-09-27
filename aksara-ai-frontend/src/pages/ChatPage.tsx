@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, LogOut, User, Bot } from 'lucide-react';
+import { Send, LogOut, User, Bot, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { chatApi } from '@/services/api';
 import { mockChatApi } from '@/services/mockApi';
 import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -22,6 +23,7 @@ const ChatPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Load initial messages
   useEffect(() => {
@@ -166,6 +168,10 @@ const ChatPage: React.FC = () => {
               <User className="h-4 w-4" />
               <span className="text-sm">{user?.nama_lengkap}</span>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
+              <Settings className="h-4 w-4 mr-2" />
+              Profile
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Keluar
