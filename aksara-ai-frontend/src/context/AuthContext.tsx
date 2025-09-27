@@ -43,24 +43,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 🔹 Load user dari localStorage saat pertama kali mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('userData');
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('userData');
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-
-        // ✅ Tambahan: auto logout kalau token expired (jika pakai JWT)
-        const payload = parseJwt(token);
-        if (payload?.exp && Date.now() >= payload.exp * 1000) {
-          logout();
-        }
-      } catch {
-        logout();
+      if (!token) {
+        setIsLoading(false);
+        return;
       }
-    }
-    setIsLoading(false);
+
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+
+          if (!parsedUser.nama_lengkap || !parsedUser.email) {
+            const profileResponse = DUMMY_MODE
+              ? await mockAuthApi.getProfile()
+              : await authApi.getProfile();
+            const profileData = profileResponse.data?.profile;
+            const userResponse = profileResponse.data?.user;
+
+            if (profileData && userResponse) {
+              const enrichedUser = {
+                id: userResponse.id,
+                username: userResponse.username,
+                nama_lengkap: profileData.nama_lengkap,
+                email: profileData.email,
+              };
+              localStorage.setItem('userData', JSON.stringify(enrichedUser));
+              setUser(enrichedUser);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to parse stored user data:', error);
+          localStorage.removeItem('userData');
+        }
+      } else {
+        try {
+          const profileResponse = DUMMY_MODE
+            ? await mockAuthApi.getProfile()
+            : await authApi.getProfile();
+          const profileData = profileResponse.data?.profile;
+          const userResponse = profileResponse.data?.user;
+
+          if (profileData && userResponse) {
+            const enrichedUser = {
+              id: userResponse.id,
+              username: userResponse.username,
+              nama_lengkap: profileData.nama_lengkap,
+              email: profileData.email,
+            };
+            localStorage.setItem('userData', JSON.stringify(enrichedUser));
+            setUser(enrichedUser);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch profile during initialization:', error);
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (username: string, password: string, callback?: () => void) => {
@@ -75,6 +120,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
+      // Simpan refresh token jika ada
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+
+      // Ensure we have complete profile details (nama_lengkap & email)
+      try {
+        const profileResponse = DUMMY_MODE
+          ? await mockAuthApi.getProfile()
+          : await authApi.getProfile();
+        const profileData = profileResponse.data?.profile;
+        const userData = profileResponse.data?.user;
+
+        if (profileData && userData) {
+          const enrichedUser = {
+            id: userData.id,
+            username: userData.username,
+            nama_lengkap: profileData.nama_lengkap,
+            email: profileData.email,
+          };
+          localStorage.setItem('userData', JSON.stringify(enrichedUser));
+          setUser(enrichedUser);
+          return;
+        }
+      } catch (profileError) {
+        console.warn('Failed to fetch profile after login:', profileError);
+      }
+
       setUser(response.user);
 
       if (callback) callback(); // redirect opsional
@@ -108,6 +181,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('userData', JSON.stringify(response.user));
+      // Simpan refresh token jika ada
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+
+      // Setelah registrasi, pastikan data profil disimpan lengkap
+      try {
+        const profileResponse = DUMMY_MODE
+          ? await mockAuthApi.getProfile()
+          : await authApi.getProfile();
+        const profileData = profileResponse.data?.profile;
+        const userData = profileResponse.data?.user;
+
+        if (profileData && userData) {
+          const enrichedUser = {
+            id: userData.id,
+            username: userData.username,
+            nama_lengkap: profileData.nama_lengkap,
+            email: profileData.email,
+          };
+          localStorage.setItem('userData', JSON.stringify(enrichedUser));
+          setUser(enrichedUser);
+          return;
+        }
+      } catch (profileError) {
+        console.warn('Failed to fetch profile after registration:', profileError);
+      }
+
       setUser(response.user);
 
       if (callback) callback(); // redirect opsional
@@ -125,6 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback((callback?: () => void) => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('userData');
     setUser(null);
     if (callback) callback();
@@ -144,12 +246,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 // 🔹 Helper: Parse JWT untuk cek expire
-function parseJwt(token: string): any | null {
-  try {
-    const base64Payload = token.split('.')[1];
-    const payload = atob(base64Payload);
-    return JSON.parse(payload);
-  } catch {
-    return null;
-  }
-}
+// function parseJwt(token: string): any | null {
+//   try {
+//     const base64Payload = token.split('.')[1];
+//     const payload = atob(base64Payload);
+//     return JSON.parse(payload);
+//   } catch {
+//     return null;
+//   }
+// }
