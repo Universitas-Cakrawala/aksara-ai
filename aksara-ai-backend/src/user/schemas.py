@@ -17,6 +17,12 @@ class UserUpdate(BaseModel):
     email: str
 
 
+class ProfileUpdate(BaseModel):
+    username: str
+    nama_lengkap: str
+    email: str
+
+
 class PasswordUpdate(BaseModel):
     old_password: str
     confirm_new_password: str

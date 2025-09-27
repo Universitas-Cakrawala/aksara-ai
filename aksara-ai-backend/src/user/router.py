@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from src.user.schemas import (
     UserCreate,
     UserUpdate,
+    ProfileUpdate,
     UserLogin,
     PasswordUpdate,
 )
@@ -56,15 +57,15 @@ async def get_user_profile(
     "/{id}",
     dependencies=[Depends(JWTBearer())],
     responses=ResponseExamples.user_update_responses(),
-    summary="Update user",
+    summary="Update user profile",
 )
-async def update_user(
-    request: UserUpdate,
+async def update_user_profile(
+    request: ProfileUpdate,
     id: str,
     authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
-    return await UserController.update(id, request, authorization, db)
+    return await UserController.updateProfile(id, request, authorization, db)
 
 
 @routerUser.put(
