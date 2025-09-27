@@ -138,10 +138,12 @@ app = create_app()
 # app.mount("/endpoints", create_limited_docs_app())
 
 if __name__ == "__main__":
+    # Port from environment variable or default to 8000
+    port = int(config("PORT", default=8000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=port,
         log_level="info",
         reload=True,
     )
