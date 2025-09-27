@@ -177,7 +177,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             Belum punya akun?{' '}
             <Button
               variant="link"
-              className="p-0 h-auto font-normal"
+              className="p-0 h-auto text-blue-500 font-normal hover:font-bold"
               onClick={onToggleMode}
             >
               Daftar di sini
