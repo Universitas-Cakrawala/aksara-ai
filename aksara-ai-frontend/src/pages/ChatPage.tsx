@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
+import { chatApi } from '@/services/api';
 import { mockChatApi } from '@/services/mockApi';
 import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
 
@@ -93,17 +94,20 @@ const ChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        setTimeout(() => {
-          const aiMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            content: `Terima kasih atas pertanyaan Anda: "${currentMessage}". Saya akan membantu Anda dengan topik literasi dan akademik. Apakah ada hal spesifik yang ingin Anda diskusikan?`,
-            sender: 'ai',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, aiMessage]);
-          setIsTyping(false);
-        }, 1500);
-        return;
+        // Use real Gemini AI API
+        const chatResponse = await chatApi.sendMessage({
+          input: currentMessage,
+          temperature: 0.7,
+          max_tokens: 512
+        });
+        
+        const aiMessage: Message = {
+          id: chatResponse.id,
+          content: chatResponse.output,
+          sender: 'ai',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error) {
       console.error('Error sending message:', error);

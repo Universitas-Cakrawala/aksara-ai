@@ -43,7 +43,7 @@ class ChatController:
                 )
 
             user = (
-                db.query(User).filter(User.id == userId, User.deleted == False).first()
+                db.query(User).filter(User.id == userId).first()
             )
 
             if not user:
@@ -61,35 +61,103 @@ class ChatController:
                     detail="Gemini API key not configured. Please set GEMINI_API_KEY environment variable.",
                 )
 
-            client = genai.Client(api_key=gemini_api_key)
-
-            response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-05-20",  # gunakan "gemini-2.5-flash-preview-05-20" untuk free tier
-                contents=request.input,
-                config=types.GenerateContentConfig(
+            # Configure the Gemini AI
+            genai.configure(api_key=gemini_api_key)
+            
+            # Create the model (updated to latest Gemini 2.5 Flash)
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            
+            # Generate content
+            response = model.generate_content(
+                request.input,
+                generation_config=genai.GenerationConfig(
                     temperature=request.temperature or 0.0,
                     max_output_tokens=request.max_tokens or 512,
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
                 ),
             )
 
-            # Extract response text - Gemini typically returns response.text
+            # Extract response text safely and handle safety blocks
             response_text = ""
-            if hasattr(response, "text") and response.text:
-                response_text = response.text
-            else:
-                # Fallback for different response formats
-                response_text = str(response)
+            normalized_finish_reason = None
+            safety_blocked = False
+
+            def normalize_finish_reason(reason):
+                if reason is None:
+                    return None
+                if hasattr(reason, "name"):
+                    return reason.name
+                if isinstance(reason, str):
+                    return reason
+                if isinstance(reason, (int, float)):
+                    return int(reason)
+                return str(reason)
+
+            if response:
+                prompt_feedback = getattr(response, "prompt_feedback", None)
+                if prompt_feedback and getattr(prompt_feedback, "block_reason", None):
+                    safety_blocked = True
+                    normalized_finish_reason = normalize_finish_reason(
+                        getattr(prompt_feedback, "block_reason", None)
+                    ) or normalized_finish_reason
+
+                candidates = getattr(response, "candidates", []) or []
+                for candidate in candidates:
+                    finish_reason = normalize_finish_reason(
+                        getattr(candidate, "finish_reason", None)
+                    )
+                    if finish_reason is not None:
+                        normalized_finish_reason = finish_reason
+                        if (
+                            (isinstance(finish_reason, int) and finish_reason == 2)
+                            or (
+                                isinstance(finish_reason, str)
+                                and "SAFETY" in finish_reason.upper()
+                            )
+                        ):
+                            safety_blocked = True
+
+                    parts = (
+                        getattr(getattr(candidate, "content", None), "parts", [])
+                        or []
+                    )
+                    text_parts = [
+                        getattr(part, "text", "")
+                        for part in parts
+                        if getattr(part, "text", "")
+                    ]
+
+                    if text_parts:
+                        response_text = "".join(text_parts).strip()
+                        break
+
+                if not response_text:
+                    text_attr = getattr(response, "text", None)
+                    if text_attr:
+                        response_text = text_attr.strip()
+
+            if not response_text:
+                if safety_blocked:
+                    response_text = (
+                        "Maaf, permintaan ini tidak dapat diproses karena melanggar kebijakan keamanan. "
+                        "Silakan coba dengan pertanyaan atau kata-kata yang berbeda."
+                    )
+                else:
+                    response_text = (
+                        "Maaf, saya tidak dapat menghasilkan respons untuk pertanyaan tersebut saat ini. "
+                        "Silakan coba lagi dengan pertanyaan yang berbeda."
+                    )
 
             # Build simple response structure
             chat_data = {
                 "id": str(userId),
-                "model": "gemini-2.5-flash-preview-05-20",
+                "model": "gemini-2.5-flash",
                 "input": request.input,
                 "output": response_text,
                 "metadata": {
                     "temperature": request.temperature or 0.0,
                     "max_tokens": request.max_tokens or 512,
+                    "finish_reason": normalized_finish_reason,
+                    "safety_blocked": safety_blocked,
                 },
             }
 
