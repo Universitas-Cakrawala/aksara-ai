@@ -11,8 +11,7 @@ migrations/
 ├── env.py                     # Konfigurasi environment Alembic
 ├── script.py.mako            # Template untuk file migration
 └── versions/                 # Folder berisi file-file migration
-    ├── 001_initial_migration.py
-    └── 002_refresh_tokens.py
+    ├── 001_initial_migration.py # Migration awal
 ```
 
 ## Cara Menggunakan Migration
@@ -75,10 +74,6 @@ Ini akan membuat:
 - Membuat tabel `user` untuk data pengguna
 - Membuat tabel `user_profile` untuk profil pengguna
 - Menambahkan indexes dan foreign keys
-
-### 2. 002_refresh_tokens.py
-- Membuat tabel `refresh_tokens` untuk mengelola JWT refresh tokens
-- Menambahkan relasi ke tabel `user`
 
 ## Model yang Tersedia
 

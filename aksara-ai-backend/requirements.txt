@@ -35,4 +35,5 @@ python-multipart==0.0.18
 typing_extensions==4.13.2
 
 # google generative ai
-google-generative-ai==0.3.0
+google-genai
+google-generativeai

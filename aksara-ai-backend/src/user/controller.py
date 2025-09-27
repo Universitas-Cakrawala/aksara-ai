@@ -11,7 +11,6 @@ from src.auth.handler import get_current_user, signJWT
 from src.utils.helper import ok, formatError
 from src.user.schemas import (
     actionTransformUserLogin,
-    actionTransformUser,
     mapUserProfileData,
     UserCreate,
     UserUpdate,
@@ -108,7 +107,7 @@ class UserController:
             db.add(userMap)
             db.add(profileMap)
             db.commit()
-            
+
             # Auto-login user after successful registration by generating tokens
             tokens = signJWT(str(userMap.id))
             response_data = {
@@ -119,7 +118,7 @@ class UserController:
                 "access_token": tokens.get("access_token"),
                 "refresh_token": tokens.get("refresh_token"),
             }
-            
+
             return ok(response_data, "Successfully Create User!", HTTP_CREATED)
         except HTTPException as e:
             db.rollback()

@@ -14,7 +14,6 @@ Sistem migration lengkap untuk Aksara AI Backend telah berhasil dibuat dengan ko
 
 #### Migration Files:
 - `001_initial_migration.py` - Migration awal untuk tabel user, user_profile
-- `002_refresh_tokens.py` - Migration untuk tabel refresh_tokens
 
 ### 2. 📊 Database Models
 
@@ -101,16 +100,6 @@ make clean            # Clean cache files
 - email (String)
 - deleted (Boolean, Default: False)
 - created_by, updated_by (String)
-- created_date, updated_date (DateTime)
-```
-
-#### 4. `refresh_tokens` (JWT Refresh Tokens)
-```sql
-- id (UUID, Primary Key)
-- token (Text, Unique)
-- user_id (UUID, FK to user.id)
-- expires_at (DateTime)
-- is_revoked (Boolean, Default: False)
 - created_date, updated_date (DateTime)
 ```
 
