@@ -164,13 +164,9 @@ const ChatPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
               <User className="h-4 w-4" />
               <span className="text-sm">{user?.nama_lengkap}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
-              <Settings className="h-4 w-4 mr-2" />
-              Profile
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
