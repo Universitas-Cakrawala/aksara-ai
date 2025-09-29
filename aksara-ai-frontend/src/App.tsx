@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import LandingPage from "@/pages/LandingPage";
 import AuthPage from "@/pages/AuthPage";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from '@/pages/ProfilePage';
@@ -22,33 +23,39 @@ const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
+      {/* Landing Page - dapat diakses tanpa autentikasi */}
+      <Route path="/" element={<LandingPage />} />
+      
+      {/* Auth routes dengan mode yang berbeda */}
       <Route
-        path="/auth"
+        path="/login"
         element={
           user ? (
-            <Navigate to="/" replace />
+            <Navigate to="/chat" replace />
           ) : (
-            <PageWrapper>
-              <AuthPage />
-            </PageWrapper>
+            <AuthPage mode="login" />
           )
         }
       />
       <Route
-        path="/"
+        path="/register"
+        element={
+          user ? (
+            <Navigate to="/chat" replace />
+          ) : (
+            <AuthPage mode="register" />
+          )
+        }
+      />
+      {/* Redirect dari /auth ke /login untuk backward compatibility */}
+      <Route path="/auth" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/chat"
         element={
           <ProtectedRoute>
             <PageWrapper>
               <ChatPage />
             </PageWrapper>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/chat"
-        element={
-          <ProtectedRoute>
-            <ChatPage />
           </ProtectedRoute>
         }
       />
