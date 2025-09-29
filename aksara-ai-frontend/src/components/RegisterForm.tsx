@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,11 +23,7 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-interface RegisterFormProps {
-  onToggleMode: () => void;
-}
-
-const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
+const RegisterForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register: registerUser, isLoading } = useAuth();
@@ -188,9 +185,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Sudah punya akun?{' '}
-            <Button variant="link" className="p-0 h-auto text-blue-500 font-normal hover:font-bold" onClick={onToggleMode}>
+            <Link
+              to="/login"
+              className="text-blue-500 font-normal hover:font-bold hover:underline"
+            >
               Masuk di sini
-            </Button>
+            </Link>
           </p>
         </div>
       </CardContent>
