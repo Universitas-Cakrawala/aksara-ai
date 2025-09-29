@@ -183,7 +183,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <User className="h-4 w-4 mr-2" />
             <span className="text-sm">{user?.nama_lengkap}</span>
           </div>
         </div>
