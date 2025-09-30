@@ -5,34 +5,37 @@ Dummy mode memungkinkan Anda untuk menjalankan aplikasi frontend tanpa memerluka
 ## Cara Mengaktifkan Dummy Mode
 
 1. Pastikan file `.env` memiliki konfigurasi berikut:
-   ```bash
-   VITE_DUMMY_MODE=true
-   ```
+
+    ```bash
+    VITE_DUMMY_MODE=true
+    ```
 
 2. Jalankan development server:
-   ```bash
-   npm run dev
-   ```
+    ```bash
+    npm run dev
+    ```
 
 ## Kredensial Dummy untuk Login
 
 Ketika dummy mode aktif, Anda dapat login menggunakan kredensial berikut:
 
-| Username | Password | Nama Lengkap    | Email            |
-|----------|----------|-----------------|------------------|
-| admin    | admin123 | Administrator   | admin@aksara.ai  |
-| user     | user123  | User Test       | user@aksara.ai   |
-| demo     | demo123  | Demo User       | demo@aksara.ai   |
+| Username | Password | Nama Lengkap  | Email           |
+| -------- | -------- | ------------- | --------------- |
+| admin    | admin123 | Administrator | admin@aksara.ai |
+| user     | user123  | User Test     | user@aksara.ai  |
+| demo     | demo123  | Demo User     | demo@aksara.ai  |
 
 ## Fitur yang Tersedia dalam Dummy Mode
 
 ### Authentication
+
 - ✅ Login dengan dummy users
 - ✅ Register user baru (disimpan sementara dalam session)
 - ✅ Logout
 - ✅ Simulasi error handling (username/password salah)
 
 ### Chat
+
 - ✅ Chat history dengan pesan dummy
 - ✅ Mengirim pesan dan mendapat respons AI dummy
 - ✅ Simulasi typing indicator

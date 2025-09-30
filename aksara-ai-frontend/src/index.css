@@ -3,89 +3,85 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* 🎨 Warna dasar */
-    --background: 40 30% 96%; /* abu-abu pastel lembut */
-    --foreground: 24 20% 15%; /* coklat gelap, teks utama */
+    :root {
+        /* 🎨 Warna dasar */
+        --background: 40 30% 96%; /* abu-abu pastel lembut */
+        --foreground: 24 20% 15%; /* coklat gelap, teks utama */
 
-    --card: 40 30% 96%;
-    --card-foreground: 24 20% 15%;
+        --card: 40 30% 96%;
+        --card-foreground: 24 20% 15%;
 
-    --popover: 40 30% 96%;
-    --popover-foreground: 24 20% 15%;
+        --popover: 40 30% 96%;
+        --popover-foreground: 24 20% 15%;
 
-    /* ✨ Mustard pastel */
-    --primary: 39 70% 55%; /* orange mustard pastel */
-    --primary-foreground: 40 30% 96%;
+        /* ✨ Mustard pastel */
+        --primary: 39 70% 55%; /* orange mustard pastel */
+        --primary-foreground: 40 30% 96%;
 
-    /* 🩶 Abu-abu lembut */
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 24 20% 15%;
+        /* 🩶 Abu-abu lembut */
+        --secondary: 0 0% 90%;
+        --secondary-foreground: 24 20% 15%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 24 5% 45%;
+        --muted: 0 0% 92%;
+        --muted-foreground: 24 5% 45%;
 
-    /* Accent untuk gradasi */
-    --accent: 39 75% 65%; /* mustard lebih terang */
-    --accent-foreground: 24 20% 15%;
+        /* Accent untuk gradasi */
+        --accent: 39 75% 65%; /* mustard lebih terang */
+        --accent-foreground: 24 20% 15%;
 
-    /* Danger / destructive */
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 40 30% 96%;
+        /* Danger / destructive */
+        --destructive: 0 70% 55%;
+        --destructive-foreground: 40 30% 96%;
 
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
-    --ring: 39 70% 55%; /* mustard glow */
+        --border: 0 0% 85%;
+        --input: 0 0% 85%;
+        --ring: 39 70% 55%; /* mustard glow */
 
-    --radius: 0.75rem;
-  }
+        --radius: 0.75rem;
+    }
 
-  .dark {
-    --background: 24 15% 10%;
-    --foreground: 39 75% 85%;
+    .dark {
+        --background: 24 15% 10%;
+        --foreground: 39 75% 85%;
 
-    --card: 24 15% 12%;
-    --card-foreground: 39 75% 85%;
+        --card: 24 15% 12%;
+        --card-foreground: 39 75% 85%;
 
-    --popover: 24 15% 12%;
-    --popover-foreground: 39 75% 85%;
+        --popover: 24 15% 12%;
+        --popover-foreground: 39 75% 85%;
 
-    --primary: 39 75% 65%; /* mustard pastel glow */
-    --primary-foreground: 24 15% 10%;
+        --primary: 39 75% 65%; /* mustard pastel glow */
+        --primary-foreground: 24 15% 10%;
 
-    --secondary: 0 0% 25%;
-    --secondary-foreground: 39 75% 85%;
+        --secondary: 0 0% 25%;
+        --secondary-foreground: 39 75% 85%;
 
-    --muted: 0 0% 30%;
-    --muted-foreground: 39 15% 70%;
+        --muted: 0 0% 30%;
+        --muted-foreground: 39 15% 70%;
 
-    --accent: 39 80% 60%;
-    --accent-foreground: 24 15% 10%;
+        --accent: 39 80% 60%;
+        --accent-foreground: 24 15% 10%;
 
-    --destructive: 0 65% 40%;
-    --destructive-foreground: 39 75% 90%;
+        --destructive: 0 65% 40%;
+        --destructive-foreground: 39 75% 90%;
 
-    --border: 0 0% 30%;
-    --input: 0 0% 30%;
-    --ring: 39 75% 65%;
-  }
+        --border: 0 0% 30%;
+        --input: 0 0% 30%;
+        --ring: 39 75% 65%;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    font-weight: 400;
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        font-weight: 400;
 
-    /* 🌅 Gradasi background */
-    background: linear-gradient(
-      135deg,
-      hsl(39 70% 55% / 0.15),
-      hsl(0 0% 90% / 0.5)
-    );
-  }
+        /* 🌅 Gradasi background */
+        background: linear-gradient(135deg, hsl(39 70% 55% / 0.15), hsl(0 0% 90% / 0.5));
+    }
 }
