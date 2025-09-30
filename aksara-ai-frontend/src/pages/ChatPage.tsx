@@ -62,8 +62,7 @@ const ChatPage: React.FC = () => {
             messages: [
               {
                 id: '1',
-                content:
-                  'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+                content: 'Halo! Saya adalah Aksara AI. Ada yang bisa saya bantu?',
                 sender: 'ai',
                 timestamp: new Date(),
               },
@@ -120,7 +119,7 @@ const ChatPage: React.FC = () => {
           ? {
               ...s,
               messages: [...s.messages, userMessage],
-              title: s.messages.length === 0 ? userMessage.content.slice(0, 20) : s.title,
+              title: s.messages.length === 0 ? userMessage.content.slice(0, 25) : s.title,
               updatedAt: new Date(),
             }
           : s
@@ -158,29 +157,12 @@ const ChatPage: React.FC = () => {
       setSessions((prev) =>
         prev.map((s) =>
           s.id === activeSessionId
-            ? {
-                ...s,
-                messages: [...s.messages, aiMessage],
-                updatedAt: new Date(),
-              }
+            ? { ...s, messages: [...s.messages, aiMessage], updatedAt: new Date() }
             : s
         )
       );
     } catch (err) {
       console.error('Error sending message:', err);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
-        sender: 'ai',
-        timestamp: new Date(),
-      };
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === activeSessionId
-            ? { ...s, messages: [...s.messages, errorMessage], updatedAt: new Date() }
-            : s
-        )
-      );
     } finally {
       setIsTyping(false);
     }
@@ -202,10 +184,25 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // grouping message by date
+  const groupMessagesByDate = (messages: Message[]) => {
+    const grouped: { date: string; items: Message[] }[] = [];
+    messages.forEach((msg) => {
+      const date = msg.timestamp.toLocaleDateString();
+      const existingGroup = grouped.find((g) => g.date === date);
+      if (existingGroup) {
+        existingGroup.items.push(msg);
+      } else {
+        grouped.push({ date, items: [msg] });
+      }
+    });
+    return grouped;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex">
+    <div className="min-h-screen flex bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-white p-4">
+      <aside className="w-64 border-r bg-card p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">History</h2>
           <Button size="sm" onClick={createNewSession}>
@@ -214,18 +211,18 @@ const ChatPage: React.FC = () => {
         </div>
         <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-150px)]">
           {sessions.length === 0 ? (
-            <p className="text-sm text-gray-500">Belum ada riwayat</p>
+            <p className="text-sm text-muted-foreground">Belum ada riwayat</p>
           ) : (
             sessions.map((s) => (
               <div
                 key={s.id}
                 onClick={() => setActiveSessionId(s.id)}
-                className={`cursor-pointer rounded-lg p-2 hover:bg-gray-100 ${
-                  activeSessionId === s.id ? 'bg-gray-200' : ''
+                className={`cursor-pointer rounded-lg p-2 hover:bg-accent/20 ${
+                  activeSessionId === s.id ? 'bg-accent/30' : ''
                 }`}
               >
                 <p className="font-medium text-sm truncate">{s.title}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {s.updatedAt.toLocaleDateString()} {s.updatedAt.toLocaleTimeString()}
                 </p>
               </div>
@@ -237,10 +234,10 @@ const ChatPage: React.FC = () => {
       {/* Chat area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="border-b bg-white shadow-sm">
+        <div className="border-b bg-card">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
             <div>
-              <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
+              <h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-bold text-transparent">
                 Aksara AI
               </h1>
               <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
@@ -265,65 +262,76 @@ const ChatPage: React.FC = () => {
               {isLoading ? (
                 <div className="flex h-full items-center justify-center">
                   <div className="space-y-2 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                     <p className="text-sm text-muted-foreground">Memuat chat...</p>
                   </div>
                 </div>
               ) : activeSessionId ? (
-                <div className="h-full space-y-4 overflow-y-auto pr-2">
-                  {sessions
-                    .find((s) => s.id === activeSessionId)
-                    ?.messages.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`flex gap-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        {m.sender === 'ai' && (
-                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                            <Bot className="h-4 w-4 text-white" />
-                          </div>
-                        )}
+                <div className="h-full space-y-6 overflow-y-auto pr-2">
+                  {groupMessagesByDate(
+                    sessions.find((s) => s.id === activeSessionId)?.messages || []
+                  ).map((group) => (
+                    <div key={group.date}>
+                      <p className="text-center text-xs text-muted-foreground mb-2">
+                        {group.date}
+                      </p>
+                      {group.items.map((m) => (
                         <div
-                          className={`max-w-[70%] rounded-lg p-3 ${
-                            m.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                          key={m.id}
+                          className={`flex gap-3 mb-2 ${
+                            m.sender === 'user' ? 'justify-end' : 'justify-start'
                           }`}
                         >
-                          <p className="whitespace-pre-wrap text-sm">{m.content}</p>
-                          <p className="mt-1 text-xs text-gray-500">{m.timestamp.toLocaleTimeString()}</p>
-                        </div>
-                        {m.sender === 'user' && (
-                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
-                            <User className="h-4 w-4 text-gray-600" />
+                          {m.sender === 'ai' && (
+                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                              <Bot className="h-4 w-4" />
+                            </div>
+                          )}
+                          <div
+                            className={`max-w-[70%] rounded-lg p-3 ${
+                              m.sender === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap text-sm">{m.content}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {m.timestamp.toLocaleTimeString()}
+                            </p>
                           </div>
-                        )}
-                      </div>
-                    ))}
-
+                          {m.sender === 'user' && (
+                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-muted">
+                              <User className="h-4 w-4 text-foreground" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                   {isTyping && (
                     <div className="flex justify-start gap-3">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                        <Bot className="h-4 w-4 text-white" />
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                        <Bot className="h-4 w-4" />
                       </div>
-                      <div className="rounded-lg bg-gray-200 p-3">
+                      <div className="rounded-lg bg-muted p-3">
                         <div className="flex space-x-1">
-                          <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500"></div>
+                          <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"></div>
                           <div
-                            className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
+                            className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
                             style={{ animationDelay: '0.1s' }}
-                          ></div>
+                          />
                           <div
-                            className="h-2 w-2 animate-bounce rounded-full bg-gray-500"
+                            className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
                             style={{ animationDelay: '0.2s' }}
-                          ></div>
+                          />
                         </div>
                       </div>
                     </div>
                   )}
-
                   <div ref={messagesEndRef} />
                 </div>
               ) : (
-                <div className="flex h-full items-center justify-center text-gray-500">
+                <div className="flex h-full items-center justify-center text-muted-foreground">
                   <p>Pilih atau buat sesi chat baru</p>
                 </div>
               )}
@@ -343,7 +351,11 @@ const ChatPage: React.FC = () => {
                     className="flex-1"
                     disabled={isTyping}
                   />
-                  <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping} size="icon">
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() || isTyping}
+                    size="icon"
+                  >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
