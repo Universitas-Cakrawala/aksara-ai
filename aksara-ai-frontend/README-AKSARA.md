@@ -29,29 +29,34 @@ Frontend aplikasi chat AI untuk Komunitas Literasi Kampus (Aksara). Dibangun den
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm atau yarn
 
 ### Installation
 
 1. Clone repository
+
 ```bash
 git clone <repository-url>
 cd aksara-ai-frontend
 ```
 
 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 3. Setup environment variables
+
 ```bash
 cp .env.example .env
 ```
+
 Edit `.env` file sesuai dengan konfigurasi backend.
 
 4. Start development server
+
 ```bash
 npm run dev
 ```
