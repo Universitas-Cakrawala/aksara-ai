@@ -26,7 +26,7 @@ type FormData = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC = () => {
   const [tampilkanPassword, setTampilkanPassword] = useState(false);
-  const { login, loginWithGoogle, isLoading } = useAuth();
+  const { login, loginWithGoogle, loginWithGithub, isLoading } = useAuth();
 
   const {
     register,
@@ -50,10 +50,20 @@ const LoginForm: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle(); // ambil dari AuthContext (misalnya Firebase Google Auth)
+      await loginWithGoogle();
     } catch (error: any) {
       setError("root", {
         message: error.message || "Gagal login dengan Google",
+      });
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      await loginWithGithub();
+    } catch (error: any) {
+      setError("root", {
+        message: error.message || "Gagal login dengan GitHub",
       });
     }
   };
@@ -65,7 +75,7 @@ const LoginForm: React.FC = () => {
           Masuk ke Aksara AI
         </CardTitle>
         <CardDescription className="text-center text-muted-foreground">
-          Masukkan username dan password Anda atau gunakan Google
+          Masukkan username dan password Anda atau gunakan Google/GitHub
         </CardDescription>
       </CardHeader>
 
@@ -156,7 +166,7 @@ const LoginForm: React.FC = () => {
         <Button
           type="button"
           variant="outline"
-          className="w-full flex items-center justify-center gap-2"
+          className="w-full flex items-center justify-center gap-2 mb-3"
           onClick={handleGoogleLogin}
         >
           <img
@@ -165,6 +175,21 @@ const LoginForm: React.FC = () => {
             className="w-5 h-5"
           />
           Continue with Google
+        </Button>
+
+        {/* Tombol GitHub */}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2"
+          onClick={handleGithubLogin}
+        >
+          <img
+            src="https://www.svgrepo.com/show/512317/github-142.svg"
+            alt="GitHub"
+            className="w-5 h-5"
+          />
+          Continue with GitHub
         </Button>
 
         {/* Navigasi daftar */}
