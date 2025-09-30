@@ -13,7 +13,7 @@ import * as z from 'zod';
 const registerSchema = z
     .object({
         nama_lengkap: z.string().min(2, 'Nama minimal 2 karakter'),
-        email: z.string().email('Email tidak valid'),
+        email: z.email('Email tidak valid'),
         username: z.string().min(3, 'Username minimal 3 karakter'),
         password: z.string().min(6, 'Password minimal 6 karakter'),
         confirmPassword: z.string(),
