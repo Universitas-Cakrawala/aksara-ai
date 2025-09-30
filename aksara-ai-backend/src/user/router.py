@@ -5,7 +5,6 @@ from src.config.postgres import get_db
 from sqlalchemy.orm import Session
 from src.user.schemas import (
     UserCreate,
-    UserUpdate,
     ProfileUpdate,
     UserLogin,
     PasswordUpdate,
