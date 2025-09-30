@@ -139,6 +139,16 @@ export const chatApi = {
     const response = await api.post('/chat/message', data);
     return response.data.data;
   },
+
+  getChatHistories: async () => {
+    const response = await api.get('/chat/histories');
+    return response.data;
+  },
+
+  getChatHistoryById: async (historyId: string) => {
+    const response = await api.get(`/chat/histories/${historyId}`);
+    return response.data;
+  },
 };
 
 export default api;

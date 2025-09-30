@@ -49,7 +49,9 @@ const Label = React.forwardRef<React.ElementRef<typeof LabelPrimitive.Root>, Lab
         >
           {props.children}
           {tooltip && (
-            <Info className="inline-block ml-1 h-3 w-3 text-gray-400 hover:text-gray-600 cursor-help" title={tooltip} />
+            <div title={tooltip} className="inline-block ml-1">
+              <Info className="h-3 w-3 text-gray-400 hover:text-gray-600 cursor-help" />
+            </div>
           )}
         </LabelPrimitive.Root>
         {helperText && (

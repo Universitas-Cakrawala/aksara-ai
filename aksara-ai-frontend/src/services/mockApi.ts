@@ -114,6 +114,90 @@ export const mockChatApi = {
     return [...DUMMY_CHAT_MESSAGES];
   },
 
+  getChatHistories: async () => {
+    await simulateNetworkDelay();
+    return {
+      data: [
+        {
+          conversation_id: "c0a80154-7c2b-4f6d-9a2b-1a2b3c4d5e6f",
+          title: "Diskusi tentang arsitektur Transformer",
+          last_message_preview: "Terima kasih, itu sangat jelas.",
+          last_sender: "user",
+          last_timestamp: "2025-09-27T12:36:45Z",
+          total_messages: 4,
+          model: "gemini-2.5-flash",
+          language: "id",
+          is_active: true,
+          created_date: "2025-09-27T12:34:56Z",
+        },
+        {
+          conversation_id: "d4f5a6b7-c8d9-40e1-9f2a-0b1c2d3e4f50",
+          title: "Catatan harian prompt",
+          last_message_preview: "Bisa tolong ringkas poin-poin utamanya?",
+          last_sender: "model",
+          last_timestamp: "2025-09-26T09:15:10Z",
+          total_messages: 2,
+          model: "gemini-2.5-flash",
+          language: "id",
+          is_active: false,
+          created_date: "2025-09-26T09:10:00Z",
+        },
+        {
+          conversation_id: "e1f2a3b4-c5d6-47e8-9a0b-1c2d3e4f5g6h",
+          title: "Rencana perjalanan liburan",
+          last_message_preview: "Apa rekomendasi tempat makan di sana?",
+          last_sender: "user",
+          last_timestamp: "2025-09-25T18:45:30Z",
+          total_messages: 5,
+          model: "gemini-2.5-flash",
+          language: "id",
+          is_active: true,
+          created_date: "2025-09-25T18:30:00Z",
+        },
+      ],
+    };
+  },
+
+  getChatHistoryById: async (historyId: string) => {
+    await simulateNetworkDelay();
+    return {
+      data: {
+        conversation_id: historyId,
+        title: "Diskusi tentang arsitektur Transformer",
+        model: "gemini-2.5-flash",
+        language: "id",
+        is_active: true,
+        created_date: "2025-09-27T12:34:56Z",
+        messages: [
+          {
+            message_id: "m1",
+            sender: "user",
+            text: "Halo, bisakah kamu menjelaskan bagaimana arsitektur Transformer bekerja?",
+            timestamp: "2025-09-27T12:34:56Z",
+          },
+          {
+            message_id: "m2",
+            sender: "model",
+            text: "Tentu! Arsitektur Transformer adalah model deep learning yang menggunakan mekanisme attention untuk memproses data sekuensial...",
+            timestamp: "2025-09-27T12:35:30Z",
+          },
+          {
+            message_id: "m3",
+            sender: "user",
+            text: "Bisakah kamu memberikan contoh aplikasinya?",
+            timestamp: "2025-09-27T12:36:10Z",
+          },
+          {
+            message_id: "m4",
+            sender: "model",
+            text: "Tentu! Transformer banyak digunakan dalam pemrosesan bahasa alami, seperti dalam model GPT dan BERT...",
+            timestamp: "2025-09-27T12:36:45Z",
+          },
+        ],
+      },
+    };
+  },
+
   sendMessage: async (message: string): Promise<DummyMessage> => {
     await simulateNetworkDelay(500, 2000); // Simulasi thinking time untuk AI
     

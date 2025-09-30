@@ -60,6 +60,16 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
+        path="/chat/:conversationId"
+        element={
+          <ProtectedRoute>
+            <PageWrapper>
+              <ChatPage />
+            </PageWrapper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/profile"
         element={
           <ProtectedRoute>

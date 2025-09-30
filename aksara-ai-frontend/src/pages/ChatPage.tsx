@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, LogOut, User, Bot, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Send, User, Bot, Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { chatApi } from '@/services/api';
 import { mockChatApi } from '@/services/mockApi';
 import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import ChatHistorySidebar from '../components/ChatHistorySidebar';
 
 interface Message {
   id: string;
@@ -20,10 +18,11 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const { conversationId } = useParams<{ conversationId?: string }>();
 
   // Load initial messages
   useEffect(() => {
@@ -54,8 +53,6 @@ const ChatPage: React.FC = () => {
           sender: 'ai',
           timestamp: new Date(),
         }]);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -132,108 +129,113 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  // ===========================
-  // Logout dengan konfirmasi + fade out + alert
-  const handleLogout = () => {
-    const confirmLogout = window.confirm('Apakah Anda yakin ingin logout?');
-    if (confirmLogout) {
-      // Fade out chat container
-      document.getElementById('chat-container')?.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-
-      setTimeout(() => {
-        logout();              // panggil fungsi logout dari context
-        setMessages([]);       // bersihkan chat
-        setInputMessage('');   // reset input
-        alert('Berhasil logout!');
-      }, 500); // delay 500ms untuk efek fade out
-    }
+  const handleConversationSelect = (conversationId: string) => {
+    navigate(`/chat/${conversationId}`);
+    setIsSidebarOpen(false); // Close sidebar on mobile after selection
   };
-  // ===========================
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Aksara AI
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Chat AI untuk Komunitas Literasi
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
-              <User className="h-4 w-4 mr-2" />
-              <span className="text-sm">{user?.nama_lengkap}</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Keluar
-            </Button>
-          </div>
-        </div>
+    <div className="flex h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 transition-transform duration-300 ease-in-out
+        fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
+        w-80 lg:w-80
+      `}>
+        <ChatHistorySidebar 
+          isOpen={true}
+          onToggle={toggleSidebar}
+          onSelectHistory={handleConversationSelect}
+          onNewChat={() => navigate('/chat')}
+          selectedHistoryId={conversationId}
+        />
       </div>
 
-      {/* Chat Container */}
-      <div id="chat-container" className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
-        {/* Messages */}
-        <Card className="flex-1 mb-4">
-          <CardContent className="p-4 h-full overflow-hidden">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-sm text-muted-foreground">Memuat chat...</p>
-                </div>
+      {/* Main chat area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 p-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleSidebar}
+              className="lg:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <div className="flex items-center space-x-2">
+              <Bot className="text-blue-600" size={24} />
+              <h1 className="text-xl font-semibold text-gray-800">
+                Aksara AI Chat
+              </h1>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <User size={16} />
+            <span>{user?.nama_lengkap || user?.username}</span>
+          </div>
+        </div>
+
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.length === 0 && !conversationId ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-gray-500">
+                <Bot size={48} className="mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">Selamat datang di Aksara AI</h3>
+                <p>Mulai percakapan dengan mengetik pesan Anda di bawah</p>
               </div>
-            ) : (
-              <div className="h-full overflow-y-auto space-y-4 pr-2">
-                {messages.map((message) => (
+            </div>
+          ) : (
+            <>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                   <div
-                    key={message.id}
-                    className={`flex gap-3 ${
-                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      message.sender === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-gray-200 text-gray-800'
                     }`}
                   >
-                    {message.sender === 'ai' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <Bot className="h-4 w-4 text-white" />
+                    <div className="flex items-start space-x-2">
+                      {message.sender === 'ai' && (
+                        <Bot size={16} className="mt-1 flex-shrink-0 text-blue-600" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
                       </div>
-                    )}
-                    <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
-                        message.sender === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.sender === 'user'
-                            ? 'text-blue-100'
-                            : 'text-muted-foreground'
-                        }`}
-                      >
-                        {message.timestamp.toLocaleTimeString()}
-                      </p>
+                      {message.sender === 'user' && (
+                        <User size={16} className="mt-1 flex-shrink-0" />
+                      )}
                     </div>
-                    {message.sender === 'user' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                        <User className="h-4 w-4 text-gray-600" />
-                      </div>
-                    )}
                   </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <Bot className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="bg-muted p-3 rounded-lg">
+                </div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-white border border-gray-200">
+                    <div className="flex items-center space-x-2">
+                      <Bot size={16} className="text-blue-600" />
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -241,36 +243,34 @@ const ChatPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
 
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Input */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Tulis pesan Anda di sini..."
-                className="flex-1"
-                disabled={isTyping}
-              />
-              <Button 
-                onClick={handleSendMessage} 
-                disabled={!inputMessage.trim() || isTyping}
-                size="icon"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Input area */}
+        <div className="bg-white border-t border-gray-200 p-4">
+          <div className="flex space-x-4">
+            <textarea
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ketik pesan Anda di sini..."
+              className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent max-h-32"
+              rows={1}
+              disabled={isTyping}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputMessage.trim() || isTyping}
+              className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
