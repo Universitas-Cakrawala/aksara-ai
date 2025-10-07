@@ -10,6 +10,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy import text
+
 from src.config.postgres import SessionLocal
 
 
@@ -20,7 +21,7 @@ def check_database_connection():
         result = db.execute(text("SELECT version();"))
         version = result.fetchone()[0]
         db.close()
-        print(f"✅ Database connection successful")
+        print("✅ Database connection successful")
         print(f"   PostgreSQL version: {version}")
         return True
     except Exception as e:
@@ -54,7 +55,7 @@ def check_tables_exist():
 
         db.close()
 
-        print(f"📊 Table status:")
+        print("📊 Table status:")
         for table in required_tables:
             status = "✅" if table in existing_tables else "❌"
             print(f"   {status} {table}")
@@ -97,7 +98,7 @@ def check_foreign_keys():
         foreign_keys = result.fetchall()
         db.close()
 
-        print(f"🔗 Foreign Key Constraints:")
+        print("🔗 Foreign Key Constraints:")
         for fk in foreign_keys:
             print(
                 f"   ✅ {fk.table_name}.{fk.column_name} -> {fk.foreign_table_name}.{fk.foreign_column_name}"
@@ -133,7 +134,7 @@ def check_indexes():
         indexes = result.fetchall()
         db.close()
 
-        print(f"📇 Database Indexes:")
+        print("📇 Database Indexes:")
         current_table = None
         for idx in indexes:
             if idx.tablename != current_table:
@@ -162,7 +163,7 @@ def check_sample_data():
             "user_profile": "SELECT COUNT(*) FROM user_profile WHERE deleted = false",
         }
 
-        print(f"📊 Sample Data:")
+        print("📊 Sample Data:")
         all_have_data = True
 
         for table, query in tables_to_check.items():
@@ -215,7 +216,7 @@ def check_migration_history():
         db.close()
 
         if current_revision:
-            print(f"📋 Migration Status:")
+            print("📋 Migration Status:")
             print(f"   ✅ Current revision: {current_revision[0]}")
             return True
         else:

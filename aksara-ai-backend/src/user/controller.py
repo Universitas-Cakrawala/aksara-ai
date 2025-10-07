@@ -1,35 +1,35 @@
-from fastapi import HTTPException, Depends
+import uuid
+
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
+
+from src.auth.handler import get_current_user, signJWT
+from src.config.postgres import get_db
+from src.constants import (
+    CURRENT_DATETIME,
+    HTTP_ACCEPTED,
+    HTTP_BAD_REQUEST,
+    HTTP_CREATED,
+    HTTP_NOT_FOUND,
+    HTTP_OK,
+    HTTP_UNAUTHORIZED,
+)
 from src.user.models import (
     User,
     UserProfile,
 )
-from src.config.postgres import get_db
-from sqlalchemy.orm import Session
-from src.user.utils import get_password_hash, verify_password
-from src.auth.handler import get_current_user, signJWT
-from src.utils.helper import ok, formatError
 from src.user.schemas import (
+    PasswordUpdate,
+    ProfileUpdate,
+    UserCreate,
+    UserLogin,
+    UserUpdate,
     actionTransformUserLogin,
     mapUserProfileData,
-    UserCreate,
-    UserUpdate,
-    ProfileUpdate,
-    UserLogin,
-    PasswordUpdate,
 )
-from src.constants import (
-    HTTP_BAD_REQUEST,
-    HTTP_BAD_REQUEST,
-    HTTP_OK,
-    HTTP_CREATED,
-    HTTP_ACCEPTED,
-    CURRENT_DATETIME,
-    HTTP_NOT_FOUND,
-    HTTP_UNAUTHORIZED,
-)
-from src.utils.helper import validateEmail
-import uuid
+from src.user.utils import get_password_hash, verify_password
+from src.utils.helper import formatError, ok, validateEmail
 
 
 class UserController:
@@ -381,7 +381,10 @@ class UserController:
                 )
 
             # Update user data
-            user_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            user_updates = {
+                "updated_date": CURRENT_DATETIME,
+                "updated_by": user.username,
+            }
             if request.username.strip() != user.username:
                 user_updates["username"] = request.username.strip()
 
@@ -389,20 +392,25 @@ class UserController:
                 db.query(User).filter(User.id == id).update(user_updates)
 
             # Update profile data
-            profile_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            profile_updates = {
+                "updated_date": CURRENT_DATETIME,
+                "updated_by": user.username,
+            }
             if request.nama_lengkap != profile.nama_lengkap:
                 profile_updates["nama_lengkap"] = request.nama_lengkap
             if request.email != profile.email:
                 profile_updates["email"] = request.email
 
             if profile_updates:
-                db.query(UserProfile).filter(UserProfile.id == profile.id).update(profile_updates)
+                db.query(UserProfile).filter(UserProfile.id == profile.id).update(
+                    profile_updates
+                )
 
             db.commit()
 
             return ok(
                 "",
-                f"Profile updated successfully!",
+                "Profile updated successfully!",
                 HTTP_OK,
             )
         except HTTPException as e:
@@ -483,6 +491,7 @@ class UserController:
             response_data = {
                 "id": transformerUserLoginUser["id"],
                 "username": user.username,
+                "role": user.role,  # Include role information
                 "nama_lengkap": profile.nama_lengkap,
                 "email": profile.email,
                 "access_token": tokens.get("access_token"),

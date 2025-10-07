@@ -37,3 +37,16 @@ typing_extensions==4.13.2
 # google generative ai
 google-genai
 google-generativeai
+
+# admin fastapi
+fastapi-admin
+
+# itsdangerous for session management
+itsdangerous
+
+# libraries for fix formatter
+black 
+isort 
+ruff 
+autoflake
+pre-commit

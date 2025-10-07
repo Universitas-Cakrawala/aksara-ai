@@ -2,8 +2,8 @@
 """
 Migration management script untuk Aksara AI Backend
 """
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 # Tambahkan root project ke sys.path

@@ -1,5 +1,8 @@
-from typing import List, Dict
+from typing import Dict, List, Optional
+
 from pydantic import BaseModel
+
+from src.user.models import UserRole
 from src.utils.date import serialize_date
 
 
@@ -8,6 +11,7 @@ class UserCreate(BaseModel):
     password: str
     nama_lengkap: str
     email: str
+    role: Optional[UserRole] = UserRole.USER
 
 
 class UserUpdate(BaseModel):
@@ -15,6 +19,7 @@ class UserUpdate(BaseModel):
     password: str
     nama_lengkap: str
     email: str
+    role: Optional[UserRole] = None
 
 
 class ProfileUpdate(BaseModel):

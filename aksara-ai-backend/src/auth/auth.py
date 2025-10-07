@@ -1,10 +1,12 @@
-from fastapi import Request, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from src.auth.handler import decodeJWT
-from decouple import config
-from typing import Optional
-import jwt
 import time
+from typing import Optional
+
+import jwt
+from decouple import config
+from fastapi import HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from src.auth.handler import decodeJWT
 from src.constants import (
     HTTP_UNAUTHORIZED,
 )

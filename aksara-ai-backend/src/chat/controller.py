@@ -1,13 +1,14 @@
 import google.genai as genai
+from decouple import config
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from src.config.postgres import get_db
-from src.utils.helper import ok, formatError
-from src.user.models import User
+
 from src.auth.handler import get_current_user
-from src.constants import HTTP_UNAUTHORIZED, HTTP_INTERNAL_SERVER_ERROR
 from src.chat.schemas import ChatRequest
-from decouple import config
+from src.config.postgres import get_db
+from src.constants import HTTP_INTERNAL_SERVER_ERROR, HTTP_UNAUTHORIZED
+from src.user.models import User
+from src.utils.helper import formatError, ok
 
 
 class ChatController:

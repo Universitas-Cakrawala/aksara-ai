@@ -21,3 +21,28 @@ executionEnvironments = [
   { root = "src/tests", extraPaths = ["src/tests/e2e", "src/sdk" ]},
   { root = "src" }
 ]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\\.pyi?$'
+exclude = '''
+/(
+  \\.(git|hg|mypy_cache|tox|venv|env|venv3|.venv)|
+  build|dist|\\.eggs|
+  migrations/versions/
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["src"]
+multi_line_output = 3
+include_trailing_comma = true
+
+[tool.ruff]
+line-length = 88
+extend-select = ["F", "E", "W", "C90"]
+exclude = ["migrations/", "venv", ".venv"]
+

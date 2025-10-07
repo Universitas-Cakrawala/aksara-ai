@@ -1,7 +1,9 @@
-from typing import Dict, Optional
-from decouple import config
-import jwt
 import time
+from typing import Dict, Optional
+
+import jwt
+from decouple import config
+
 from src.constants import HTTP_UNAUTHORIZED
 
 JWT_SECRET: str = str(config("JWT_SECRET"))

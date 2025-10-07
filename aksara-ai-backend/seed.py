@@ -9,11 +9,13 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from sqlalchemy.orm import Session
-from src.config.postgres import SessionLocal
-from src.user.models import User, UserProfile
-from datetime import datetime
 import hashlib
+from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from src.config.postgres import SessionLocal
+from src.user.models import User, UserProfile, UserRole
 
 
 def create_admin_user(db: Session):
@@ -25,6 +27,7 @@ def create_admin_user(db: Session):
         username="admin",
         password=password_hash,
         is_active=True,
+        role=UserRole.ADMIN,  # Set role sebagai ADMIN
         created_by="system",
         updated_by="system",
         created_date=datetime.now(),
@@ -65,7 +68,7 @@ def seed_database():
         print("🎉 Database seeding completed successfully!")
         print("\n📋 Default credentials:")
         print(f"   Username: {user.username}")
-        print(f"   Password: admin123")
+        print("   Password: admin123")
         print(f"   Email: {profile.email}")
 
     except Exception as e:

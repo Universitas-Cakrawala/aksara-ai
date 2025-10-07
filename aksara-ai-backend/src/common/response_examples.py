@@ -3,7 +3,7 @@ Centralized response examples for all API endpoints.
 This file contains all response formats that can be imported and used in routers.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ResponseExamples:

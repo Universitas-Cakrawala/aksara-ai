@@ -1,9 +1,9 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
-import sys
 import os
+import sys
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Tambahkan path root project ke sys.path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 # Import model dan konfigurasi database
 try:
     from src.config.postgres import SQLALCHEMY_DATABASE_URL
-except Exception as e:
+except Exception:
     # Fallback untuk development/testing
     SQLALCHEMY_DATABASE_URL: str = "postgresql://user:password@localhost:5432/dbname"
 
