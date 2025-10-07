@@ -381,7 +381,10 @@ class UserController:
                 )
 
             # Update user data
-            user_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            user_updates = {
+                "updated_date": CURRENT_DATETIME,
+                "updated_by": user.username,
+            }
             if request.username.strip() != user.username:
                 user_updates["username"] = request.username.strip()
 
@@ -389,14 +392,19 @@ class UserController:
                 db.query(User).filter(User.id == id).update(user_updates)
 
             # Update profile data
-            profile_updates = {"updated_date": CURRENT_DATETIME, "updated_by": user.username}
+            profile_updates = {
+                "updated_date": CURRENT_DATETIME,
+                "updated_by": user.username,
+            }
             if request.nama_lengkap != profile.nama_lengkap:
                 profile_updates["nama_lengkap"] = request.nama_lengkap
             if request.email != profile.email:
                 profile_updates["email"] = request.email
 
             if profile_updates:
-                db.query(UserProfile).filter(UserProfile.id == profile.id).update(profile_updates)
+                db.query(UserProfile).filter(UserProfile.id == profile.id).update(
+                    profile_updates
+                )
 
             db.commit()
 
@@ -483,6 +491,7 @@ class UserController:
             response_data = {
                 "id": transformerUserLoginUser["id"],
                 "username": user.username,
+                "role": user.role,  # Include role information
                 "nama_lengkap": profile.nama_lengkap,
                 "email": profile.email,
                 "access_token": tokens.get("access_token"),

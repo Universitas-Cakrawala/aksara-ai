@@ -1,10 +1,12 @@
 from fastapi import FastAPI, APIRouter, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from src.middleware.ip_middleware import AddClientIPMiddleware
 from src.health.router import routerHealth
 from src.user.router import routerUser
 from src.chat.router import routerChat
 from src.refresh_token.router import routerRefreshToken
+from src.admin.config import setup_admin_routes
 from src.utils.allowed_middleware import (
     ALLOWED_METHODS,
     ALLOWED_HEADERS,
@@ -65,6 +67,11 @@ def create_app() -> FastAPI:
     # Add custom exception handler
     app.add_exception_handler(Exception, custom_exception_handler)
 
+    # Add session middleware for admin authentication
+    app.add_middleware(
+        SessionMiddleware, secret_key="your-secret-key-change-in-production"
+    )
+
     # Middleware for adding client IP
     app.add_middleware(AddClientIPMiddleware)
 
@@ -118,6 +125,10 @@ def create_app() -> FastAPI:
     router_api_v1.include_router(routerChat, prefix="/chat", tags=["Chat"])
 
     app.include_router(router_api_v1)
+
+    # Setup admin routes
+    setup_admin_routes(app)
+
     return app
 
 

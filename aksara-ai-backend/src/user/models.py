@@ -2,6 +2,12 @@ from sqlmodel import SQLModel, Field
 import datetime
 from typing import Optional
 import uuid
+from enum import Enum
+
+
+class UserRole(str, Enum):
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class User(SQLModel, table=True):
@@ -11,6 +17,7 @@ class User(SQLModel, table=True):
     username: str = Field(unique=True, index=True)
     password: str
     is_active: bool
+    role: UserRole = Field(default=UserRole.USER, index=True)
     deleted: bool = Field(default=False)
     created_by: str
     created_date: Optional[datetime.datetime] = None
