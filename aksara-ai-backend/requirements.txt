@@ -43,3 +43,10 @@ fastapi-admin
 
 # itsdangerous for session management
 itsdangerous
+
+# libraries for fix formatter
+black 
+isort 
+ruff 
+autoflake
+pre-commit

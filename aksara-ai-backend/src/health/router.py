@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from src.health.controller import HealthController
+
 from src.common.response_examples import ResponseExamples
+from src.health.controller import HealthController
 
 routerHealth = APIRouter()
 

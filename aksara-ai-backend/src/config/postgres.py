@@ -1,8 +1,9 @@
+import logging
+
 from decouple import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlmodel import SQLModel
-import logging
 
 # Konfigurasi logging
 logger = logging.getLogger(__name__)

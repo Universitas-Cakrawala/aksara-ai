@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
-from src.refresh_token.controller import (
-    TokenHandler,
-)  # Pastikan TokenHandler diimpor dengan benar
+
 from src.auth.auth import RefreshTokenBearer
 from src.common.response_examples import ResponseExamples
+from src.refresh_token.controller import (  # Pastikan TokenHandler diimpor dengan benar
+    TokenHandler,
+)
 
 routerRefreshToken = APIRouter()
 refresh_token_scheme = RefreshTokenBearer()

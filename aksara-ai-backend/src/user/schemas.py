@@ -1,7 +1,9 @@
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from pydantic import BaseModel
-from src.utils.date import serialize_date
+
 from src.user.models import UserRole
+from src.utils.date import serialize_date
 
 
 class UserCreate(BaseModel):

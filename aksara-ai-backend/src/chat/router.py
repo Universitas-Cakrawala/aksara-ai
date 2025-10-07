@@ -1,11 +1,11 @@
-from fastapi import APIRouter
-from src.chat.controller import ChatController
-from src.auth.auth import JWTBearer
-from src.config.postgres import get_db
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
+from src.auth.auth import JWTBearer
+from src.chat.controller import ChatController
 from src.chat.schemas import ChatRequest
 from src.common.response_examples import ResponseExamples
-from fastapi import Depends
+from src.config.postgres import get_db
 
 routerChat = APIRouter()
 

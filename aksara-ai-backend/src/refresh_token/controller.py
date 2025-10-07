@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+
 from src.auth.handler import (
-    refresh_access_token as external_refresh_access_token,
-)  # Fungsi refresh token dari modul eksternal
+    refresh_access_token as external_refresh_access_token,  # Fungsi refresh token dari modul eksternal
+)
 from src.constants import HTTP_UNAUTHORIZED
-from src.utils.helper import ok, formatError
+from src.utils.helper import formatError, ok
 
 
 class TokenHandler:

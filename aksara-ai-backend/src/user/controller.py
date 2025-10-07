@@ -1,35 +1,35 @@
-from fastapi import HTTPException, Depends
+import uuid
+
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
+
+from src.auth.handler import get_current_user, signJWT
+from src.config.postgres import get_db
+from src.constants import (
+    CURRENT_DATETIME,
+    HTTP_ACCEPTED,
+    HTTP_BAD_REQUEST,
+    HTTP_CREATED,
+    HTTP_NOT_FOUND,
+    HTTP_OK,
+    HTTP_UNAUTHORIZED,
+)
 from src.user.models import (
     User,
     UserProfile,
 )
-from src.config.postgres import get_db
-from sqlalchemy.orm import Session
-from src.user.utils import get_password_hash, verify_password
-from src.auth.handler import get_current_user, signJWT
-from src.utils.helper import ok, formatError
 from src.user.schemas import (
+    PasswordUpdate,
+    ProfileUpdate,
+    UserCreate,
+    UserLogin,
+    UserUpdate,
     actionTransformUserLogin,
     mapUserProfileData,
-    UserCreate,
-    UserUpdate,
-    ProfileUpdate,
-    UserLogin,
-    PasswordUpdate,
 )
-from src.constants import (
-    HTTP_BAD_REQUEST,
-    HTTP_BAD_REQUEST,
-    HTTP_OK,
-    HTTP_CREATED,
-    HTTP_ACCEPTED,
-    CURRENT_DATETIME,
-    HTTP_NOT_FOUND,
-    HTTP_UNAUTHORIZED,
-)
-from src.utils.helper import validateEmail
-import uuid
+from src.user.utils import get_password_hash, verify_password
+from src.utils.helper import formatError, ok, validateEmail
 
 
 class UserController:
@@ -410,7 +410,7 @@ class UserController:
 
             return ok(
                 "",
-                f"Profile updated successfully!",
+                "Profile updated successfully!",
                 HTTP_OK,
             )
         except HTTPException as e:

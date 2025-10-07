@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends
-from src.user.controller import UserController
-from src.auth.auth import JWTBearer
-from src.config.postgres import get_db
 from sqlalchemy.orm import Session
-from src.user.schemas import (
-    UserCreate,
-    ProfileUpdate,
-    UserLogin,
-    PasswordUpdate,
-)
-from src.common.response_examples import ResponseExamples
 
+from src.auth.auth import JWTBearer
+from src.common.response_examples import ResponseExamples
+from src.config.postgres import get_db
+from src.user.controller import UserController
+from src.user.schemas import (
+    PasswordUpdate,
+    ProfileUpdate,
+    UserCreate,
+    UserLogin,
+)
 
 routerUser = APIRouter()
 

@@ -3,13 +3,14 @@ FastAPI Admin Configuration
 This module sets up a simple admin interface for user management
 """
 
-from fastapi import APIRouter, Request, Form, Depends, HTTPException
+import hashlib
+from datetime import datetime
+
+import bcrypt
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from datetime import datetime
-import bcrypt
-import hashlib
 
 from src.config.postgres import get_db
 from src.user.models import User, UserRole
@@ -87,7 +88,7 @@ async def admin_login(
                 # If not bcrypt format, try SHA256 (fallback for old passwords)
                 sha256_hash = hashlib.sha256(password.encode()).hexdigest()
                 password_valid = user.password == sha256_hash
-        except Exception as bcrypt_error:
+        except Exception:
             # If bcrypt fails, try SHA256 (fallback for old passwords)
             sha256_hash = hashlib.sha256(password.encode()).hexdigest()
             password_valid = user.password == sha256_hash

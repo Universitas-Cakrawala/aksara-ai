@@ -1,22 +1,24 @@
-from fastapi import FastAPI, APIRouter, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
-from src.middleware.ip_middleware import AddClientIPMiddleware
-from src.health.router import routerHealth
-from src.user.router import routerUser
-from src.chat.router import routerChat
-from src.refresh_token.router import routerRefreshToken
-from src.admin.config import setup_admin_routes
-from src.utils.allowed_middleware import (
-    ALLOWED_METHODS,
-    ALLOWED_HEADERS,
-    ALLOWED_ORIGINS,
-)
-from fastapi.responses import JSONResponse
-from decouple import config
-import uvicorn as uvicorn
 import logging
 import sys
+
+import uvicorn as uvicorn
+from decouple import config
+from fastapi import APIRouter, FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
+
+from src.admin.config import setup_admin_routes
+from src.chat.router import routerChat
+from src.health.router import routerHealth
+from src.middleware.ip_middleware import AddClientIPMiddleware
+from src.refresh_token.router import routerRefreshToken
+from src.user.router import routerUser
+from src.utils.allowed_middleware import (
+    ALLOWED_HEADERS,
+    ALLOWED_METHODS,
+    ALLOWED_ORIGINS,
+)
 
 # environment server
 ENVIRONMENT = config("ENVIRONMENT", default="prod")

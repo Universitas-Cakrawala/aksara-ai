@@ -3,12 +3,13 @@ Admin Role Middleware
 This middleware checks if user has admin role for protected admin endpoints
 """
 
-from fastapi import HTTPException, Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from src.config.postgres import get_db
-from src.user.models import User, UserRole
+
 from src.auth.handler import get_current_user
-from src.constants import HTTP_UNAUTHORIZED, HTTP_FORBIDDEN
+from src.config.postgres import get_db
+from src.constants import HTTP_FORBIDDEN, HTTP_UNAUTHORIZED
+from src.user.models import User, UserRole
 
 
 def require_admin_role(authorization: str, db: Session = Depends(get_db)) -> User:
@@ -62,7 +63,7 @@ def require_admin_role(authorization: str, db: Session = Depends(get_db)) -> Use
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=HTTP_UNAUTHORIZED, detail="Invalid authorization token"
         )
@@ -74,7 +75,7 @@ def is_admin_user(authorization: str, db: Session = Depends(get_db)) -> bool:
     Returns True if admin, False otherwise
     """
     try:
-        user = require_admin_role(authorization, db)
+        require_admin_role(authorization, db)
         return True
     except HTTPException:
         return False

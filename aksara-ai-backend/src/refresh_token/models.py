@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field
 import datetime
-from typing import Optional
 import uuid
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
 
 
 class RefreshToken(SQLModel, table=True):

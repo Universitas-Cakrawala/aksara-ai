@@ -1,8 +1,9 @@
-from sqlmodel import SQLModel, Field
 import datetime
-from typing import Optional
 import uuid
 from enum import Enum
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
 
 
 class UserRole(str, Enum):

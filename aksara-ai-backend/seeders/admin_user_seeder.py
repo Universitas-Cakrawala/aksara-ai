@@ -10,10 +10,11 @@ from datetime import datetime
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from passlib.context import CryptContext
 from sqlmodel import Session
+
 from src.config.postgres import engine
 from src.user.models import User, UserRole
-from passlib.context import CryptContext
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -58,10 +59,10 @@ def create_admin_user():
         session.commit()
         session.refresh(admin_user)
 
-        print(f"✅ Admin user created successfully!")
+        print("✅ Admin user created successfully!")
         print(f"Username: {admin_username}")
         print(f"Password: {admin_password}")
-        print(f"⚠️  Please change the password after first login!")
+        print("⚠️  Please change the password after first login!")
 
         return admin_user
 
