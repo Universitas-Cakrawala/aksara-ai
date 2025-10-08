@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
@@ -7,7 +5,6 @@ from starlette.responses import JSONResponse
 from src.auth.handler import get_current_user, signJWT
 from src.config.postgres import get_db
 from src.constants import (
-    CURRENT_DATETIME,
     HTTP_ACCEPTED,
     HTTP_BAD_REQUEST,
     HTTP_CREATED,
@@ -15,10 +12,7 @@ from src.constants import (
     HTTP_OK,
     HTTP_UNAUTHORIZED,
 )
-from src.user.models import (
-    User,
-    UserProfile,
-)
+from src.user.repository import UserRepository
 from src.user.schemas import (
     PasswordUpdate,
     ProfileUpdate,
@@ -39,17 +33,23 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Extract and validate input data
             username = request.username.strip()
             password = request.password.strip()
             nama_lengkap = request.nama_lengkap.strip()
             email = request.email.strip()
-            isEmailValid = validateEmail(email)
 
-            if isEmailValid == False:
+            # Validate email format
+            if not validateEmail(email):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Email tidak valid!",
                 )
+
+            # Validate input constraints
             if username == "":
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
@@ -61,70 +61,47 @@ class UserController:
                     detail="password must be at least 8 characters!",
                 )
 
-            existing_email = (
-                db.query(UserProfile)
-                .filter(UserProfile.email == email, UserProfile.deleted == False)
-                .first()
-            )
-
-            if existing_email:
+            # Check if email already exists
+            if repo.is_email_taken(email):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail=f"Email : {email} already exists!",
                 )
 
-            existing_user = db.query(User).filter(User.username == username).first()
-            if existing_user and existing_user.deleted == False:
+            # Check if username already exists
+            if repo.is_username_taken(username):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Username already exists!",
                 )
 
-            hashPassword = get_password_hash(password)
+            # Hash password
+            hashed_password = get_password_hash(password)
 
-            id_user = uuid.uuid4().hex
-            userMap = User(
-                id=id_user,
-                username=username,
-                password=hashPassword,
-                is_active=True,
-                created_by=username,
-                created_date=CURRENT_DATETIME,
-                updated_by=username,
-            )
+            # Create user and profile
+            user = repo.create_user(username, hashed_password, username)
+            profile = repo.create_user_profile(user.id, nama_lengkap, email, username)
 
-            idProfile = uuid.uuid4().hex
-            profileMap = UserProfile(
-                id=idProfile,
-                id_user=id_user,
-                nama_lengkap=nama_lengkap,
-                email=email,
-                created_by=username,
-                created_date=CURRENT_DATETIME,
-                updated_by=username,
-            )
-
-            db.add(userMap)
-            db.add(profileMap)
-            db.commit()
+            # Commit transaction
+            repo.commit()
 
             # Auto-login user after successful registration by generating tokens
-            tokens = signJWT(str(userMap.id))
+            tokens = signJWT(str(user.id))
             response_data = {
-                "id": str(userMap.id),
-                "username": userMap.username,
-                "nama_lengkap": profileMap.nama_lengkap,
-                "email": profileMap.email,
+                "id": str(user.id),
+                "username": user.username,
+                "nama_lengkap": profile.nama_lengkap,
+                "email": profile.email,
                 "access_token": tokens.get("access_token"),
                 "refresh_token": tokens.get("refresh_token"),
             }
 
             return ok(response_data, "Successfully Create User!", HTTP_CREATED)
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
@@ -135,12 +112,17 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Validate authorization token
             if not authorization:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
 
+            # Extract token
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
                     token = authorization.split("Bearer", 1)[1].strip()
@@ -149,126 +131,79 @@ class UserController:
             else:
                 token = authorization
 
-            userId = get_current_user(token)
-            if userId is None:
+            # Validate user session
+            user_id = get_current_user(token)
+            if user_id is None:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You are not logged in!",
                 )
 
-            isEmailValid = validateEmail(request.email)
-            if isEmailValid == False:
+            # Validate email format
+            if not validateEmail(request.email):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Email tidak valid!",
                 )
 
-            existing_email = (
-                db.query(UserProfile, User)
-                .join(User, User.id == UserProfile.id_user)
-                .filter(
-                    UserProfile.email == request.email,
-                    User.id != id,
-                    UserProfile.deleted == False,
-                )
-                .first()
-            )
-
-            if existing_email is not None:
+            # Check if email already exists (excluding current user)
+            if repo.is_email_taken(request.email, exclude_user_id=id):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail=f"Email : {request.email} already exists!",
                 )
 
-            existing_user = (
-                db.query(User).filter(User.id == id, User.deleted == False).first()
-            )
-
-            if existing_user is None:
+            # Check if user exists
+            existing_user = repo.get_user_by_id(id)
+            if not existing_user:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail=f"User with id {id} not found!",
                 )
 
-            existing_user_profile = (
-                db.query(UserProfile)
-                .filter(UserProfile.id_user == id, UserProfile.deleted == False)
-                .first()
-            )
-
-            if existing_user_profile is None:
+            # Check if user profile exists
+            existing_profile = repo.get_profile_by_user_id(id)
+            if not existing_profile:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="Your profile not found!",
                 )
 
-            user_data = (
-                db.query(User).filter(User.id == userId, User.deleted == False).first()
-            )
-
-            if not user_data:
+            # Get current user data for audit
+            current_user_data = repo.get_user_by_id(user_id)
+            if not current_user_data:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Session has ended, please login again!",
                 )
 
-            current_user = user_data
-
-            userQuery = (
-                db.query(User, UserProfile)
-                .join(UserProfile, UserProfile.id_user == id)
-                .filter(
-                    User.deleted == False,
-                    UserProfile.deleted == False,
-                    User.id == id,
-                )
-                .first()
-            )
-
-            if not userQuery:
-                raise HTTPException(
-                    status_code=HTTP_NOT_FOUND, detail="User data not found!"
-                )
-
-            update_user, _, _, update_user_profile = userQuery
-
-            # Validate and update fields if provided
-            def validate_and_update(data, field, value, validation=None):
-                if value != "":
-                    if value is not None:
-                        if validation and not validation(value):
-                            raise HTTPException(
-                                status_code=HTTP_BAD_REQUEST,
-                                detail=f"{field} validation failed!",
-                            )
-                        data[field] = value
-
-            update_data = {}
+            # Prepare update data
+            user_update_data = {}
             profile_update_data = {}
 
-            validate_and_update(update_data, "username", request.username.strip())
+            # Update username if provided and not empty
+            if request.username.strip():
+                user_update_data["username"] = request.username.strip()
+                user_update_data["updated_by"] = current_user_data.username
 
-            validate_and_update(
-                profile_update_data, "nama_lengkap", request.nama_lengkap
-            )
-            validate_and_update(profile_update_data, "email", request.email)
+            # Update profile fields if provided
+            if request.nama_lengkap:
+                profile_update_data["nama_lengkap"] = request.nama_lengkap
+                profile_update_data["updated_by"] = current_user_data.username
 
-            # Set common update fields
-            def set_common_fields(data):
-                data["updated_date"] = CURRENT_DATETIME
-                data["updated_by"] = current_user.username
+            if request.email:
+                profile_update_data["email"] = request.email
+                profile_update_data["updated_by"] = current_user_data.username
 
-            if update_data:
-                set_common_fields(update_data)
-                db.query(User).filter(User.id == id).update(update_data)
+            # Perform updates using repository
+            if user_update_data:
+                repo.update_user(id, user_update_data)
 
             if profile_update_data:
-                set_common_fields(profile_update_data)
-                db.query(UserProfile).filter(
-                    UserProfile.id == update_user_profile.id
-                ).update(profile_update_data)
+                repo.update_user_profile(existing_profile.id, profile_update_data)
 
-            db.commit()
+            # Commit transaction
+            repo.commit()
 
             return ok(
                 "",
@@ -276,10 +211,10 @@ class UserController:
                 HTTP_OK,
             )
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
@@ -290,12 +225,17 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Validate authorization token
             if not authorization:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
 
+            # Extract token
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
                     token = authorization.split("Bearer", 1)[1].strip()
@@ -304,109 +244,84 @@ class UserController:
             else:
                 token = authorization
 
-            userId = get_current_user(token)
-            if userId is None:
+            # Validate user session
+            user_id = get_current_user(token)
+            if user_id is None:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You are not logged in!",
                 )
 
             # Validate that the user is updating their own profile
-            if userId != id:
+            if user_id != id:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You can only update your own profile!",
                 )
 
             # Validate email format
-            isEmailValid = validateEmail(request.email)
-            if not isEmailValid:
+            if not validateEmail(request.email):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Email tidak valid!",
                 )
 
             # Check if email already exists (excluding current user)
-            existing_email = (
-                db.query(UserProfile, User)
-                .join(User, User.id == UserProfile.id_user)
-                .filter(
-                    UserProfile.email == request.email,
-                    User.id != id,
-                    UserProfile.deleted == False,
-                )
-                .first()
-            )
-
-            if existing_email is not None:
+            if repo.is_email_taken(request.email, exclude_user_id=id):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail=f"Email : {request.email} already exists!",
                 )
 
             # Check if username already exists (excluding current user)
-            existing_username = (
-                db.query(User)
-                .filter(
-                    User.username == request.username.strip(),
-                    User.id != id,
-                    User.deleted == False,
-                )
-                .first()
-            )
-
-            if existing_username is not None:
+            if repo.is_username_taken(request.username.strip(), exclude_user_id=id):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail=f"Username : {request.username} already exists!",
                 )
 
             # Get current user and profile
-            user = db.query(User).filter(User.id == id, User.deleted == False).first()
+            user = repo.get_user_by_id(id)
             if not user:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail=f"User with id {id} not found!",
                 )
 
-            profile = (
-                db.query(UserProfile)
-                .filter(UserProfile.id_user == id, UserProfile.deleted == False)
-                .first()
-            )
+            profile = repo.get_profile_by_user_id(id)
             if not profile:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="User profile not found!",
                 )
 
-            # Update user data
-            user_updates = {
-                "updated_date": CURRENT_DATETIME,
-                "updated_by": user.username,
-            }
+            # Prepare update data
+            user_updates = {}
+            profile_updates = {}
+
+            # Update username if changed
             if request.username.strip() != user.username:
                 user_updates["username"] = request.username.strip()
+                user_updates["updated_by"] = user.username
 
-            if user_updates:
-                db.query(User).filter(User.id == id).update(user_updates)
-
-            # Update profile data
-            profile_updates = {
-                "updated_date": CURRENT_DATETIME,
-                "updated_by": user.username,
-            }
+            # Update profile fields if changed
             if request.nama_lengkap != profile.nama_lengkap:
                 profile_updates["nama_lengkap"] = request.nama_lengkap
+                profile_updates["updated_by"] = user.username
+
             if request.email != profile.email:
                 profile_updates["email"] = request.email
+                profile_updates["updated_by"] = user.username
+
+            # Perform updates using repository
+            if user_updates:
+                repo.update_user(id, user_updates)
 
             if profile_updates:
-                db.query(UserProfile).filter(UserProfile.id == profile.id).update(
-                    profile_updates
-                )
+                repo.update_user_profile(profile.id, profile_updates)
 
-            db.commit()
+            # Commit transaction
+            repo.commit()
 
             return ok(
                 "",
@@ -414,10 +329,10 @@ class UserController:
                 HTTP_OK,
             )
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
@@ -426,6 +341,10 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Extract and validate input
             username = request.username.strip()
             password = request.password.strip()
 
@@ -440,56 +359,35 @@ class UserController:
                     detail="password must be at least 8 characters!",
                 )
 
-            user = (
-                db.query(User)
-                .filter(
-                    User.username == username,
-                    User.deleted == False,
-                    User.is_active == True,
-                )
-                .first()
-            )
-
-            if user is None:
+            # Get user with profile from repository
+            user_with_profile = repo.get_user_with_profile_by_username(username)
+            if not user_with_profile:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="user not found!",
                 )
 
-            if user.is_active == False:
+            user, profile = user_with_profile
+
+            # Check if user is active
+            if not user.is_active:
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Your account is no longer active!",
                 )
 
-            transformerUserLoginUser = actionTransformUserLogin(user)
-
-            verifyPasword = verify_password(
-                password, transformerUserLoginUser["password"]
-            )
-
-            if verifyPasword == False:
+            # Verify password
+            transformer_user = actionTransformUserLogin(user)
+            if not verify_password(password, transformer_user["password"]):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="password atau username yang di input salah!",
                 )
 
-            profile = (
-                db.query(UserProfile)
-                .filter(UserProfile.id_user == user.id, UserProfile.deleted == False)
-                .first()
-            )
-
-            if profile is None:
-                raise HTTPException(
-                    status_code=HTTP_NOT_FOUND,
-                    detail="User profile not found!",
-                )
-
-            # Sign JWT tokens (access + refresh) and return them without exposing password
-            tokens = signJWT(transformerUserLoginUser["id"])
+            # Generate JWT tokens and return response
+            tokens = signJWT(transformer_user["id"])
             response_data = {
-                "id": transformerUserLoginUser["id"],
+                "id": transformer_user["id"],
                 "username": user.username,
                 "role": user.role,  # Include role information
                 "nama_lengkap": profile.nama_lengkap,
@@ -500,10 +398,10 @@ class UserController:
 
             return ok(response_data, "Successfully Login!", HTTP_ACCEPTED)
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
@@ -512,12 +410,17 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Validate authorization token
             if not authorization:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
 
+            # Extract token
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
                     token = authorization.split("Bearer", 1)[1].strip()
@@ -526,41 +429,30 @@ class UserController:
             else:
                 token = authorization
 
-            userId = get_current_user(token)
-
-            if userId is None:
+            # Get current user ID from token
+            user_id = get_current_user(token)
+            if user_id is None:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You are not logged in!",
                 )
 
-            user = (
-                db.query(User, UserProfile)
-                .join(
-                    UserProfile,
-                    UserProfile.id_user == User.id,
-                )
-                .filter(
-                    UserProfile.deleted == False,
-                    User.deleted == False,
-                    User.id == userId,
-                )
-                .first()
-            )
-
-            if not user:
+            # Get user with profile from repository
+            user_with_profile = repo.get_user_with_profile(user_id)
+            if not user_with_profile:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="User profile not found!",
                 )
 
-            transformer = mapUserProfileData(user)
+            # Transform data and return response
+            transformer = mapUserProfileData(user_with_profile)
             return ok(transformer, "Successfully Get user Profile!", HTTP_OK)
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
@@ -571,12 +463,17 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Validate authorization token
             if not authorization:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="Authorization token is missing!",
                 )
 
+            # Extract token
             if isinstance(authorization, str) and "Bearer" in authorization:
                 try:
                     token = authorization.split("Bearer", 1)[1].strip()
@@ -585,61 +482,62 @@ class UserController:
             else:
                 token = authorization
 
-            userId = get_current_user(token)
-            if userId is None:
+            # Validate user session
+            user_id = get_current_user(token)
+            if user_id is None:
                 raise HTTPException(
                     status_code=HTTP_UNAUTHORIZED,
                     detail="You are not logged in!",
                 )
 
-            # Fetch the current user data from the database
-            user_data = (
-                db.query(User).filter(User.id == id, User.deleted == False).first()
-            )
-
+            # Get user data from repository
+            user_data = repo.get_user_by_id(id)
             if not user_data:
                 raise HTTPException(
                     status_code=HTTP_NOT_FOUND,
                     detail="User not found!",
                 )
 
+            # Validate password match
             if request.new_password != request.confirm_new_password:
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="New password and Confirm new password do not match!",
                 )
 
+            # Verify old password
             if not verify_password(request.old_password, user_data.password):
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Old password is incorrect!",
                 )
 
-            update_data = {}
+            # Validate new password length
+            if len(request.new_password) < 8:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password must be at least 8 characters long!",
+                )
 
-            new_password = request.new_password
-            if new_password:
-                if len(new_password) < 8:
-                    raise HTTPException(
-                        status_code=HTTP_BAD_REQUEST,
-                        detail="Password must be at least 8 characters long!",
-                    )
-                update_data["password"] = get_password_hash(new_password)
+            # Update password using repository
+            hashed_password = get_password_hash(request.new_password)
+            success = repo.update_user_password(
+                user_id, hashed_password, user_data.username
+            )
 
-            def set_common_fields(data):
-                data["updated_date"] = CURRENT_DATETIME
-                data["updated_by"] = user_data.username
+            if not success:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Failed to update password!",
+                )
 
-            if update_data:
-                set_common_fields(update_data)
-                db.query(User).filter(User.id == userId).update(update_data)
-
-            db.commit()
+            # Commit transaction
+            repo.commit()
 
             return ok("", "Update password successfully!", HTTP_OK)
         except HTTPException as e:
-            db.rollback()
+            repo.rollback()
             return formatError(e.detail, e.status_code)
         except Exception as e:
-            db.rollback()
+            repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
