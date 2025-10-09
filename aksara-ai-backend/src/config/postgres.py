@@ -1,18 +1,14 @@
-import logging
-
 from decouple import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlmodel import SQLModel
-
-# Konfigurasi logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from src.utils.helper import log
 
 # URL koneksi database dari environment variables
 SQLALCHEMY_DATABASE_URL: str = str(config("DATABASE_CONN"))
 
-print("DB URLNYA:", SQLALCHEMY_DATABASE_URL)
+# Debug: Log the database URL (for debugging purposes only)
+log(f"DB URLNYA: {SQLALCHEMY_DATABASE_URL}", log_level="debug")
 
 # Membuat engine dengan pengaturan yang berbeda untuk SQLite dan PostgreSQL
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
@@ -53,7 +49,7 @@ def get_db():
 
 def init_db():
     """Inisialisasi database."""
-    logger.debug("Connect to DB ....")
+    log("Connect to DB ....", log_level="debug")
     # Menggunakan SQLModel.metadata.create_all untuk compatibility dengan Alembic
     SQLModel.metadata.create_all(bind=engine)
 

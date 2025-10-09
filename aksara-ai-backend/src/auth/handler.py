@@ -137,4 +137,4 @@ def get_current_user(jwtoken: str) -> Optional[str]:
             return payload["id"]
     except:
         pass
-    return None  # Kembalikan None jika token tidak valid
+    return None

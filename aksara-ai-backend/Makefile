@@ -67,7 +67,7 @@ migrate-history:
 # Data seeding
 seed:
 	@echo "🌱 Seeding database..."
-	python seed.py
+	python ./seeders/seed.py
 	@echo "✅ Database seeded!"
 
 # Validation

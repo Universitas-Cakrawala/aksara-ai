@@ -1,4 +1,5 @@
 import re
+import logging
 
 from src.common.schemas import create_error_response, create_success_response
 
@@ -50,3 +51,18 @@ def formatError(message, status_code):
     return create_error_response(
         message=message, error_code=status_code, status_code=status_code
     )
+
+
+# function logging errors, info, debug
+def log(message, log_level="info"):
+    log_level = log_level.lower()
+    if log_level == "error":
+        logging.error(message)
+    elif log_level == "info":
+        logging.info(message)
+    elif log_level == "debug":
+        logging.debug(message)
+    elif log_level == "warning":
+        logging.warning(message)
+    else:
+        logging.info(message)  # Default to info if invalid level provided
