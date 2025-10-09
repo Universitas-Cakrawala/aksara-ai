@@ -60,6 +60,11 @@ class UserController:
                     status_code=HTTP_BAD_REQUEST,
                     detail="password must be at least 8 characters!",
                 )
+            elif len(password.encode("utf-8")) > 72:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password is too long! Maximum 72 bytes allowed.",
+                )
 
             # Check if email already exists
             if repo.is_email_taken(email):
@@ -358,6 +363,11 @@ class UserController:
                     status_code=HTTP_BAD_REQUEST,
                     detail="password must be at least 8 characters!",
                 )
+            elif len(password.encode("utf-8")) > 72:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password is too long! Maximum 72 bytes allowed.",
+                )
 
             # Get user with profile from repository
             user_with_profile = repo.get_user_with_profile_by_username(username)
@@ -517,6 +527,11 @@ class UserController:
                 raise HTTPException(
                     status_code=HTTP_BAD_REQUEST,
                     detail="Password must be at least 8 characters long!",
+                )
+            elif len(request.new_password.encode("utf-8")) > 72:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password is too long! Maximum 72 bytes allowed.",
                 )
 
             # Update password using repository

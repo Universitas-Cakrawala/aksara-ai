@@ -9,12 +9,12 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent  # Go up one level to project root
 sys.path.insert(0, str(project_root))
 
-import bcrypt
 from sqlalchemy.orm import Session
 
 from src.config.postgres import SessionLocal
 from src.user.models import UserRole
 from src.user.repository import UserRepository
+from src.user.utils import get_password_hash  # Use the same password hashing as the app
 
 
 def create_admin_user(db: Session):
@@ -47,11 +47,9 @@ def create_admin_user(db: Session):
                 return existing_admin, existing_profile
 
         print("Creating new admin user...")
-        # Generate bcrypt hash untuk password yang lebih secure
+        # Use the same password hashing as the application
         password_plain = "admin123"
-        password_hash = bcrypt.hashpw(
-            password_plain.encode("utf-8"), bcrypt.gensalt()
-        ).decode("utf-8")
+        password_hash = get_password_hash(password_plain)
 
         # Create admin user menggunakan repository
         user = repo.create_user(
