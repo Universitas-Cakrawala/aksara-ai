@@ -1,4 +1,5 @@
 import bcrypt
+from src.utils.helper import log
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -15,7 +16,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
         return bcrypt.checkpw(password_bytes, hashed_password)
     except Exception as e:
-        print(f"Password verification error: {e}")
+        log(f"Password verification error: {e}", log_level="error")
         return False
 
 
@@ -32,5 +33,5 @@ def get_password_hash(password: str) -> str:
         hashed = bcrypt.hashpw(password_bytes, salt)
         return hashed.decode("utf-8")
     except Exception as e:
-        print(f"Password hashing error: {e}")
+        log(f"Password hashing error: {e}", log_level="error")
         raise

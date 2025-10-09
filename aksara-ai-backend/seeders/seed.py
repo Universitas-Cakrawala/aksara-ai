@@ -81,12 +81,12 @@ def create_admin_user(db: Session):
 
 def seed_database():
     """Mengisi database dengan data awal"""
-    print("🌱 Starting database seeding...")
+    print("Starting database seeding...")
 
     db = SessionLocal()
     try:
 
-        print("👤 Setting up admin user...")
+        print("Setting up admin user...")
         user, profile = create_admin_user(db)
 
         if user and profile:
