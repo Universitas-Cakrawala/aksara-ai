@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import ChatHistorySidebar from '@/components/ChatHistorySidebar';
 import { useAuth } from '@/context/AuthContext';
 import { chatApi } from '@/services/api';
 import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
 import { mockChatApi } from '@/services/mockApi';
-import { Bot, LogOut, Send, User } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { Bot, LogOut, Menu, Send, User } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -21,6 +22,8 @@ const ChatPage: React.FC = () => {
     const [inputMessage, setInputMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -66,6 +69,56 @@ const ChatPage: React.FC = () => {
         };
 
         loadChatHistory();
+    }, []);
+
+    // Load specific chat history when selected
+    const loadChatById = useCallback(async (chatId: string) => {
+        try {
+            setIsLoading(true);
+            if (DUMMY_MODE) {
+                // Keep existing dummy logic
+                const dummyMessages = await mockChatApi.getChatHistory();
+                const formattedMessages = dummyMessages.map((msg: DummyMessage) => ({
+                    id: msg.id,
+                    content: msg.text,
+                    sender: msg.sender,
+                    timestamp: msg.timestamp,
+                }));
+                setMessages(formattedMessages);
+            } else {
+                const chatDetail = await chatApi.getChatHistoryById(chatId);
+                const formattedMessages = chatDetail.messages.map((msg) => ({
+                    id: msg.message_id,
+                    content: msg.text,
+                    sender: msg.sender === 'model' ? 'ai' : msg.sender as 'user' | 'ai',
+                    timestamp: new Date(msg.timestamp),
+                }));
+                setMessages(formattedMessages);
+            }
+            setSelectedChatId(chatId);
+        } catch (error) {
+            console.error('Error loading chat:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    // Handle chat selection from sidebar
+    const handleChatSelect = useCallback((chatId: string) => {
+        loadChatById(chatId);
+    }, [loadChatById]);
+
+    // Handle new chat creation
+    const handleNewChat = useCallback(() => {
+        setSelectedChatId(null);
+        setMessages([
+            {
+                id: '1',
+                content: 'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+                sender: 'ai',
+                timestamp: new Date(),
+            },
+        ]);
     }, []);
 
     const scrollToBottom = () => {
@@ -157,15 +210,26 @@ const ChatPage: React.FC = () => {
     // ===========================
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-gray-50 to-gray-200">
             {/* Header */}
             <div className="border-b bg-white shadow-sm">
-                <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-                    <div>
-                        <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
-                            Aksara AI
-                        </h1>
-                        <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
+                <div className="flex items-center justify-between px-4 py-4">
+                    <div className="flex items-center gap-4">
+                        {/* Sidebar Toggle for Mobile */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="lg:hidden"
+                        >
+                            <Menu className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <h1 className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-2xl font-bold text-transparent">
+                                Aksara AI
+                            </h1>
+                            <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
@@ -180,15 +244,27 @@ const ChatPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Chat Container */}
-            <div id="chat-container" className="mx-auto flex h-[calc(100vh-120px)] max-w-4xl flex-col p-4">
+            {/* Main Content Area */}
+            <div className="flex h-[calc(100vh-80px)]">
+                {/* Sidebar */}
+                <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden lg:w-80`}>
+                    <ChatHistorySidebar
+                        selectedChatId={selectedChatId || undefined}
+                        onChatSelect={handleChatSelect}
+                        onNewChat={handleNewChat}
+                        className="h-full"
+                    />
+                </div>
+
+                {/* Chat Container */}
+                <div className="flex-1 flex flex-col p-4">
                 {/* Messages */}
                 <Card className="mb-4 flex-1">
                     <CardContent className="h-full overflow-hidden p-4">
                         {isLoading ? (
                             <div className="flex h-full items-center justify-center">
                                 <div className="space-y-2 text-center">
-                                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-orange-600"></div>
                                     <p className="text-sm text-muted-foreground">Memuat chat...</p>
                                 </div>
                             </div>
@@ -202,21 +278,21 @@ const ChatPage: React.FC = () => {
                                         }`}
                                     >
                                         {message.sender === 'ai' && (
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-600">
                                                 <Bot className="h-4 w-4 text-white" />
                                             </div>
                                         )}
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${
-                                                message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-muted'
+                                                message.sender === 'user' ? 'bg-orange-600 text-white' : 'bg-gray-100'
                                             }`}
                                         >
                                             <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                                             <p
                                                 className={`mt-1 text-xs ${
                                                     message.sender === 'user'
-                                                        ? 'text-blue-100'
-                                                        : 'text-muted-foreground'
+                                                        ? 'text-orange-100'
+                                                        : 'text-gray-500'
                                                 }`}
                                             >
                                                 {message.timestamp.toLocaleTimeString()}
@@ -257,24 +333,25 @@ const ChatPage: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Input */}
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex gap-2">
-                            <Input
-                                value={inputMessage}
-                                onChange={(e) => setInputMessage(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder="Tulis pesan Anda di sini..."
-                                className="flex-1"
-                                disabled={isTyping}
-                            />
-                            <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping} size="icon">
-                                <Send className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                    {/* Input */}
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex gap-2">
+                                <Input
+                                    value={inputMessage}
+                                    onChange={(e) => setInputMessage(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    placeholder="Tulis pesan Anda di sini..."
+                                    className="flex-1"
+                                    disabled={isTyping}
+                                />
+                                <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping} size="icon">
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     );
