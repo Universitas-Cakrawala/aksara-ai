@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel as BaseModelV2
 
 from src.auth.handler import (
     refresh_access_token as external_refresh_access_token,  # Fungsi refresh token dari modul eksternal
@@ -9,7 +9,7 @@ from src.utils.helper import formatError, ok
 
 class TokenHandler:
 
-    class TokenResponse(BaseModel):
+    class TokenResponse(BaseModelV2):
         access_token: str
         refresh_token: str
 

@@ -1,7 +1,7 @@
-from pydantic import BaseModel, conint
+from pydantic import BaseModel as BaseModelV2, conint
 
 
-class PageParams(BaseModel):
+class PageParams(BaseModelV2):
     """Request query params for paginated API."""
 
     page: conint(ge=1) = 1
