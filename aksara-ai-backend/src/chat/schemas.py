@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel as BaseModelV2, Field
 
 
-class ChatRequest(BaseModel):
+class ChatRequest(BaseModelV2):
     """Incoming HTTP request body for chat endpoint."""
 
     input: str = Field(..., description="User chat input / prompt")
@@ -13,12 +13,12 @@ class ChatRequest(BaseModel):
     max_tokens: Optional[int] = Field(default=512, description="Max tokens to generate")
 
 
-class ChatMessage(BaseModel):
+class ChatMessage(BaseModelV2):
     role: str = Field(..., description="speaker role, e.g. 'user' or 'assistant'")
     content: str = Field(..., description="message text")
 
 
-class ChatResponse(BaseModel):
+class ChatResponse(BaseModelV2):
     """Standard API response wrapping the model reply."""
 
     id: Optional[str]

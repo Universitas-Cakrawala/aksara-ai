@@ -8,14 +8,14 @@ These schemas define the standardized format for success and error responses.
 from typing import Any, Generic, Optional, TypeVar
 
 from fastapi import status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel as BaseModelV2, Field
 from starlette.responses import JSONResponse
 
 T = TypeVar("T")
 
 
 # Base response models
-class BaseResponse(BaseModel, Generic[T]):
+class BaseResponse(BaseModelV2, Generic[T]):
     """Base response model for all API responses"""
 
     message: str = Field(..., description="Response message")
@@ -28,7 +28,7 @@ class SuccessResponse(BaseResponse[T]):
     data: Optional[T] = Field(default=None, description="Response data")
 
 
-class ErrorDetail(BaseModel):
+class ErrorDetail(BaseModelV2):
     """Error detail structure"""
 
     error_code: int = Field(..., description="HTTP error code")

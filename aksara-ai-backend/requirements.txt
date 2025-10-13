@@ -11,8 +11,8 @@ pymongo==4.10.1
 alembic==1.13.2
 
 # Data validation and settings
-pydantic==2.9.2
-pydantic-settings==2.6.1
+pydantic
+pydantic-settings
 
 # Authentication & Security
 PyJWT==2.9.0
