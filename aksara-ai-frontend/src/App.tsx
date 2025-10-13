@@ -35,9 +35,7 @@ const AppRoutes: React.FC = () => {
                 path="/chat"
                 element={
                     <ProtectedRoute>
-                        <PageWrapper>
-                            <ChatPage />
-                        </PageWrapper>
+                        <ChatPage />
                     </ProtectedRoute>
                 }
             />

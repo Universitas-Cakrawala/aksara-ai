@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -140,9 +140,47 @@ export interface ChatResponse {
     };
 }
 
+export interface ChatHistory {
+    conversation_id: string;
+    title: string;
+    last_message_preview: string;
+    last_sender: string;
+    last_timestamp: string;
+    total_messages: number;
+    model: string;
+    language: string;
+    is_active: boolean;
+    created_date: string;
+}
+
+export interface ChatHistoryDetail {
+    conversation_id: string;
+    title: string;
+    model: string;
+    language: string;
+    is_active: boolean;
+    created_date: string;
+    messages: Array<{
+        message_id: string;
+        sender: string;
+        text: string;
+        timestamp: string;
+    }>;
+}
+
 export const chatApi = {
     sendMessage: async (data: ChatRequest): Promise<ChatResponse> => {
         const response = await api.post('/chat/message', data);
+        return response.data.data;
+    },
+
+    getChatHistories: async (): Promise<ChatHistory[]> => {
+        const response = await api.get('/chat/histories');
+        return response.data.data;
+    },
+
+    getChatHistoryById: async (historyId: string): Promise<ChatHistoryDetail> => {
+        const response = await api.get(`/chat/histories/${historyId}`);
         return response.data.data;
     },
 };
