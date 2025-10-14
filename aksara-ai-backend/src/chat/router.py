@@ -7,7 +7,7 @@ from src.chat.schemas import ChatRequest
 from src.common.response_examples import ResponseExamples
 from src.config.postgres import get_db
 
-routerChat = APIRouter()
+routerChat = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 @routerChat.post(
@@ -37,9 +37,9 @@ async def get_chat_histories(
     return await ChatController.get_chat_histories(authorization, db)
 
 
-# get one chat history by id
 @routerChat.get(
     "/histories/{history_id}",
+    status_code=200,
     dependencies=[Depends(JWTBearer())],
     responses=ResponseExamples.chat_history_responses(),
     summary="Get chat history by ID",
