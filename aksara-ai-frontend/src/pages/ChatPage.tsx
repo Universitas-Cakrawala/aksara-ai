@@ -257,81 +257,81 @@ const ChatPage: React.FC = () => {
                 </div>
 
                 {/* Chat Container */}
-                <div className="flex-1 flex flex-col p-4">
-                {/* Messages */}
-                <Card className="mb-4 flex-1">
-                    <CardContent className="h-full overflow-hidden p-4">
-                        {isLoading ? (
-                            <div className="flex h-full items-center justify-center">
-                                <div className="space-y-2 text-center">
-                                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-orange-600"></div>
-                                    <p className="text-sm text-muted-foreground">Memuat chat...</p>
+                <div className="flex-1 flex flex-col">
+                    {/* Messages */}
+                    <Card className="mb-4 flex-1 overflow-hidden rounded-none">
+                        <CardContent className="h-full overflow-hidden p-4">
+                            {isLoading ? (
+                                <div className="flex h-full items-center justify-center">
+                                    <div className="space-y-2 text-center">
+                                        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-orange-600"></div>
+                                        <p className="text-sm text-muted-foreground">Memuat chat...</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="h-full space-y-4 overflow-y-auto pr-2">
-                                {messages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={`flex gap-3 ${
-                                            message.sender === 'user' ? 'justify-end' : 'justify-start'
-                                        }`}
-                                    >
-                                        {message.sender === 'ai' && (
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-600">
-                                                <Bot className="h-4 w-4 text-white" />
-                                            </div>
-                                        )}
+                            ) : (
+                                <div className="h-full space-y-4 overflow-y-auto pr-2">
+                                    {messages.map((message) => (
                                         <div
-                                            className={`max-w-[70%] rounded-lg p-3 ${
-                                                message.sender === 'user' ? 'bg-orange-600 text-white' : 'bg-gray-100'
+                                            key={message.id}
+                                            className={`flex gap-3 ${
+                                                message.sender === 'user' ? 'justify-end' : 'justify-start'
                                             }`}
                                         >
-                                            <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-                                            <p
-                                                className={`mt-1 text-xs ${
-                                                    message.sender === 'user'
-                                                        ? 'text-orange-100'
-                                                        : 'text-gray-500'
+                                            {message.sender === 'ai' && (
+                                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-600">
+                                                    <Bot className="h-4 w-4 text-white" />
+                                                </div>
+                                            )}
+                                            <div
+                                                className={`max-w-[70%] rounded-lg p-3 ${
+                                                    message.sender === 'user' ? 'bg-orange-600 text-white' : 'bg-gray-100'
                                                 }`}
                                             >
-                                                {message.timestamp.toLocaleTimeString()}
-                                            </p>
-                                        </div>
-                                        {message.sender === 'user' && (
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
-                                                <User className="h-4 w-4 text-gray-600" />
+                                                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                                                <p
+                                                    className={`mt-1 text-xs ${
+                                                        message.sender === 'user'
+                                                            ? 'text-orange-100'
+                                                            : 'text-gray-500'
+                                                    }`}
+                                                >
+                                                    {message.timestamp.toLocaleTimeString()}
+                                                </p>
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
-
-                                {isTyping && (
-                                    <div className="flex justify-start gap-3">
-                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                                            <Bot className="h-4 w-4 text-white" />
+                                            {message.sender === 'user' && (
+                                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
+                                                    <User className="h-4 w-4 text-gray-600" />
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="rounded-lg bg-muted p-3">
-                                            <div className="flex space-x-1">
-                                                <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
-                                                <div
-                                                    className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-                                                    style={{ animationDelay: '0.1s' }}
-                                                ></div>
-                                                <div
-                                                    className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-                                                    style={{ animationDelay: '0.2s' }}
-                                                ></div>
+                                    ))}
+
+                                    {isTyping && (
+                                        <div className="flex justify-start gap-3">
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                                                <Bot className="h-4 w-4 text-white" />
+                                            </div>
+                                            <div className="rounded-lg bg-muted p-3">
+                                                <div className="flex space-x-1">
+                                                    <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                                                    <div
+                                                        className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                                                        style={{ animationDelay: '0.1s' }}
+                                                    ></div>
+                                                    <div
+                                                        className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                                                        style={{ animationDelay: '0.2s' }}
+                                                    ></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                <div ref={messagesEndRef} />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                    <div ref={messagesEndRef} />
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
 
                     {/* Input */}
                     <Card>

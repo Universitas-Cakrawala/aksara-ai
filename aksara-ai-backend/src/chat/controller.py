@@ -84,9 +84,24 @@ class ChatController:
             if not userId:
                 raise HTTPException(status_code=HTTP_UNAUTHORIZED, detail="You are not logged in!")
 
-            # contoh statis dulu
-            chat_histories = db.query(ChatRepository).all()
-            return ok(chat_histories, "Successfully fetched chat histories", 200)
+            repo = ChatRepository(db)
+            chat_histories = repo.list_user_histories(userId)
+            
+            # Format the response
+            formatted_histories = [
+                {
+                    "conversation_id": chat.id,
+                    "title": chat.title,
+                    "model": chat.model,
+                    "language": chat.language,
+                    "is_active": chat.is_active,
+                    "created_date": chat.created_date.isoformat(),
+                    "message_count": len(chat.messages) if chat.messages else 0
+                }
+                for chat in chat_histories
+            ]
+            
+            return ok(formatted_histories, "Successfully fetched chat histories", 200)
         except HTTPException as e:
             return formatError(e.detail, e.status_code)
         except Exception as e:

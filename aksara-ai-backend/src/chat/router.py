@@ -7,7 +7,7 @@ from src.chat.schemas import ChatRequest
 from src.common.response_examples import ResponseExamples
 from src.config.postgres import get_db
 
-routerChat = APIRouter(prefix="/chat", tags=["Chat"])
+routerChat = APIRouter(tags=["Chat"])
 
 
 @routerChat.post(

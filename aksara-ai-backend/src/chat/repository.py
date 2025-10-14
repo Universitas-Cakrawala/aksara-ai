@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.orm import Session
-from src.schemas import ChatHistory, ChatMessage
-from src.models import ChatHistoryModel  # Pastikan kamu punya model ini di folder models
+from src.chat.models import ChatHistory, ChatMessage
+from src.chat.schemas import ChatRequest
 
 
 class ChatRepository:
@@ -11,7 +11,7 @@ class ChatRepository:
         self.db = db
 
     def create_chat_history(self, user_id: str, messages: list[ChatMessage], title: str = None):
-        new_chat = ChatHistoryModel(
+        new_chat = ChatHistory(
             id=str(uuid.uuid4()),
             user_id=user_id,
             title=title or "New Chat",
@@ -23,10 +23,10 @@ class ChatRepository:
         return new_chat
 
     def get_chat_history(self, chat_id: str):
-        return self.db.query(ChatHistoryModel).filter(ChatHistoryModel.id == chat_id).first()
+        return self.db.query(ChatHistory).filter(ChatHistory.id == chat_id).first()
 
     def list_user_histories(self, user_id: str):
-        return self.db.query(ChatHistoryModel).filter(ChatHistoryModel.user_id == user_id).all()
+        return self.db.query(ChatHistory).filter(ChatHistory.user_id == user_id).all()
 
     def update_chat_history(self, chat_id: str, new_messages: list[ChatMessage]):
         chat = self.get_chat_history(chat_id)
@@ -45,3 +45,9 @@ class ChatRepository:
             self.db.commit()
             return True
         return False
+
+    def find_one_chat(self, chat_id: str, user_id: str):
+        return self.db.query(ChatHistory).filter(
+            ChatHistory.id == chat_id,
+            ChatHistory.user_id == user_id
+        ).first()
