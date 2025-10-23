@@ -41,7 +41,6 @@ async def login_user(
 
 @routerUser.get(
     "/profile",
-    dependencies=[Depends(JWTBearer())],
     responses=ResponseExamples.user_profile_responses(),
     summary="Get user profile",
 )
@@ -49,12 +48,12 @@ async def get_user_profile(
     authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
+    # Role validation handled by controller
     return await UserController.profile(authorization, db)
 
 
 @routerUser.put(
     "/{id}",
-    dependencies=[Depends(JWTBearer())],
     responses=ResponseExamples.user_update_responses(),
     summary="Update user profile",
 )
@@ -64,12 +63,12 @@ async def update_user_profile(
     authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
+    # Role validation handled by controller
     return await UserController.updateProfile(id, request, authorization, db)
 
 
 @routerUser.put(
     "/update-password/{id}",
-    dependencies=[Depends(JWTBearer())],
     responses=ResponseExamples.user_password_update_responses(),
     summary="Update user password",
 )
@@ -79,4 +78,5 @@ async def update_user_password(
     authorization: str = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
+    # Role validation handled by controller
     return await UserController.updatePasswordById(id, request, authorization, db)

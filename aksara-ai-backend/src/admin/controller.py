@@ -1,232 +1,473 @@
 """
-AdminController - Business logic for admin functionality
+AdminController - Business logic for admin functionality (API-based)
 """
 
-import hashlib
-from typing import Union
-
-import bcrypt
-from fastapi import Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
 
 from src.admin.repository import AdminRepository
-from src.config.postgres import get_db
-from src.user.models import User, UserRole
+from src.admin.schemas import (
+    AdminUserCreateRequest,
+    AdminUserUpdateRequest,
+    ChangeUserRoleRequest,
+    ToggleUserActiveRequest,
+)
 
-# Initialize templates
-templates = Jinja2Templates(directory="templates")
+from src.config.postgres import get_db
+from src.constants import (
+    HTTP_BAD_REQUEST,
+    HTTP_CREATED,
+    HTTP_NOT_FOUND,
+    HTTP_OK,
+    HTTP_UNAUTHORIZED,
+    HTTP_FORBIDDEN,
+)
+from src.user.repository import UserRepository
+from src.middleware.middleware import get_password_hash
+from src.utils.date import serialize_date
+from src.utils.helper import formatError, ok, validateEmail
+from src.middleware.middleware import require_admin_role
+from src.middleware.middleware import get_user_id_from_token
 
 
 class AdminController:
-    """Controller class for Admin business logic"""
+    """Controller class for Admin business logic - REST API based"""
 
     @staticmethod
-    def require_admin(request: Request, db: Session = Depends(get_db)) -> User:
-        """Dependency to require admin authentication"""
-        admin_id = request.session.get("admin_user_id")
-        if not admin_id:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-
-        repo = AdminRepository(db)
-        user = repo.get_admin_by_id(admin_id)
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Not authorized")
-
-        return user
-
-    @staticmethod
-    async def login_page(request: Request) -> HTMLResponse:
-        """Display admin login page"""
-        return templates.TemplateResponse("admin/login.html", {"request": request})
-
-    @staticmethod
-    async def login(
-        request: Request,
-        username: str = Form(...),
-        password: str = Form(...),
+    async def get_dashboard_statistics(
+        authorization: str,
         db: Session = Depends(get_db),
-    ) -> Union[RedirectResponse, HTMLResponse]:
-        """Handle admin login"""
+    ) -> JSONResponse:
+        """Get dashboard statistics for admin"""
         try:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
+
             repo = AdminRepository(db)
-            user = repo.get_admin_by_username(username)
+            stats = repo.get_user_statistics()
 
-            if not user:
-                return templates.TemplateResponse(
-                    "admin/login.html",
-                    {"request": request, "error": "Invalid credentials"},
-                )
-
-            # Verify password - handle both bcrypt and SHA256 hashes
-            password_valid = AdminController._verify_password(password, user.password)
-
-            if not password_valid:
-                return templates.TemplateResponse(
-                    "admin/login.html",
-                    {"request": request, "error": "Invalid credentials"},
-                )
-
-            # Set session
-            request.session["admin_user_id"] = user.id
-            return RedirectResponse(url="/admin/dashboard", status_code=302)
-
+            return ok(stats, "Successfully retrieved statistics!", HTTP_OK)
+        except HTTPException as e:
+            return formatError(e.detail, e.status_code)
         except Exception as e:
-            return templates.TemplateResponse(
-                "admin/login.html",
-                {"request": request, "error": f"Login failed: {str(e)}"},
+            return formatError(str(e), HTTP_BAD_REQUEST)
+
+    @staticmethod
+    async def get_all_users(
+        authorization: str,
+        db: Session = Depends(get_db),
+    ) -> JSONResponse:
+        """Get all users - Admin only"""
+        try:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
+
+            repo = AdminRepository(db)
+            user_repo = UserRepository(db)
+
+            users = repo.get_all_users()
+
+            # Transform users data with profile information
+            users_data = []
+            for user in users:
+                profile = user_repo.get_profile_by_user_id(str(user.id))
+                user_data = {
+                    "id": str(user.id),
+                    "username": user.username,
+                    "role": user.role,
+                    "is_active": user.is_active,
+                    "deleted": user.deleted,
+                    "created_date": serialize_date(user.created_date),
+                    "email": profile.email if profile else None,
+                    "nama_lengkap": profile.nama_lengkap if profile else None,
+                }
+                users_data.append(user_data)
+
+            return ok(users_data, "Successfully retrieved all users!", HTTP_OK)
+        except HTTPException as e:
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            return formatError(str(e), HTTP_BAD_REQUEST)
+
+    @staticmethod
+    async def get_user_by_id(
+        user_id: str,
+        authorization: str,
+        db: Session = Depends(get_db),
+    ) -> JSONResponse:
+        """Get user by ID - Admin only"""
+        try:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
+
+            repo = AdminRepository(db)
+            user_repo = UserRepository(db)
+
+            user = repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail=f"User with id {user_id} not found!",
+                )
+
+            profile = user_repo.get_profile_by_user_id(user_id)
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "role": user.role,
+                "is_active": user.is_active,
+                "deleted": user.deleted,
+                "created_date": serialize_date(user.created_date),
+                "email": profile.email if profile else None,
+                "nama_lengkap": profile.nama_lengkap if profile else None,
+            }
+
+            return ok(user_data, "Successfully retrieved user!", HTTP_OK)
+        except HTTPException as e:
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            return formatError(str(e), HTTP_BAD_REQUEST)
+
+    @staticmethod
+    async def create_user(
+        request: AdminUserCreateRequest,
+        authorization: str,
+        db: Session = Depends(get_db),
+    ) -> JSONResponse:
+        """Create new user - Admin only"""
+        try:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
+
+            user_repo = UserRepository(db)
+            admin_repo = AdminRepository(db)
+
+            admin_id = get_user_id_from_token(authorization)
+            admin_user = admin_repo.get_admin_by_id(admin_id)
+            if not admin_user:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Invalid admin session!",
+                )
+
+            # Validate input
+            username = request.username.strip()
+            password = request.password.strip()
+            nama_lengkap = request.nama_lengkap.strip()
+            email = request.email.strip()
+
+            if not validateEmail(email):
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Email tidak valid!",
+                )
+
+            if username == "":
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Username couldn't be empty!",
+                )
+            elif len(password) < 8:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password must be at least 8 characters!",
+                )
+            elif len(password.encode("utf-8")) > 72:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Password is too long! Maximum 72 bytes allowed.",
+                )
+
+            # Check if email/username already exists
+            if user_repo.is_email_taken(email):
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail=f"Email : {email} already exists!",
+                )
+
+            if user_repo.is_username_taken(username):
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Username already exists!",
+                )
+
+            # Hash password
+            hashed_password = get_password_hash(password)
+
+            # Create user with specified role
+            user = user_repo.create_user(
+                username, hashed_password, admin_user.username, role=request.role
+            )
+            profile = user_repo.create_user_profile(
+                user.id, nama_lengkap, email, admin_user.username
             )
 
-    @staticmethod
-    async def logout(request: Request) -> RedirectResponse:
-        """Handle admin logout"""
-        request.session.clear()
-        return RedirectResponse(url="/admin/login", status_code=302)
+            # Commit transaction
+            user_repo.commit()
+
+            response_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "role": user.role,
+                "nama_lengkap": profile.nama_lengkap,
+                "email": profile.email,
+            }
+
+            return ok(response_data, "User created successfully!", HTTP_CREATED)
+        except HTTPException as e:
+            user_repo.rollback()
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            user_repo.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
-    async def dashboard(
-        request: Request,
-        current_admin: User = Depends(require_admin),
+    async def update_user(
+        user_id: str,
+        request: AdminUserUpdateRequest,
+        authorization: str,
         db: Session = Depends(get_db),
-    ) -> HTMLResponse:
-        """Admin dashboard"""
-        repo = AdminRepository(db)
-        stats = repo.get_user_statistics()
+    ) -> JSONResponse:
+        """Update user - Admin only"""
+        try:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
 
-        return templates.TemplateResponse(
-            "admin/dashboard.html",
-            {"request": request, "current_admin": current_admin, "stats": stats},
-        )
+            user_repo = UserRepository(db)
+            admin_repo = AdminRepository(db)
 
-    @staticmethod
-    async def users_list(
-        request: Request,
-        current_admin: User = Depends(require_admin),
-        db: Session = Depends(get_db),
-    ) -> HTMLResponse:
-        """List all users"""
-        repo = AdminRepository(db)
-        users = repo.get_all_users()
+            admin_id = get_user_id_from_token(authorization)
+            admin_user = admin_repo.get_admin_by_id(admin_id)
+            if not admin_user:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Invalid admin session!",
+                )
 
-        return templates.TemplateResponse(
-            "admin/users.html",
-            {"request": request, "current_admin": current_admin, "users": users},
-        )
+            # Check if user exists
+            user = user_repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail=f"User with id {user_id} not found!",
+                )
+
+            profile = user_repo.get_profile_by_user_id(user_id)
+
+            # Prepare update data
+            user_updates = {}
+            profile_updates = {}
+
+            # Update username if provided
+            if request.username and request.username.strip():
+                if user_repo.is_username_taken(
+                    request.username.strip(), exclude_user_id=user_id
+                ):
+                    raise HTTPException(
+                        status_code=HTTP_BAD_REQUEST,
+                        detail="Username already exists!",
+                    )
+                user_updates["username"] = request.username.strip()
+                user_updates["updated_by"] = admin_user.username
+
+            # Update role if provided
+            if request.role:
+                user_updates["role"] = request.role
+                user_updates["updated_by"] = admin_user.username
+
+            # Update is_active if provided
+            if request.is_active is not None:
+                user_updates["is_active"] = request.is_active
+                user_updates["updated_by"] = admin_user.username
+
+            # Update profile fields if provided
+            if request.email and request.email.strip():
+                if not validateEmail(request.email):
+                    raise HTTPException(
+                        status_code=HTTP_BAD_REQUEST,
+                        detail="Email tidak valid!",
+                    )
+                if user_repo.is_email_taken(request.email, exclude_user_id=user_id):
+                    raise HTTPException(
+                        status_code=HTTP_BAD_REQUEST,
+                        detail=f"Email : {request.email} already exists!",
+                    )
+                profile_updates["email"] = request.email
+                profile_updates["updated_by"] = admin_user.username
+
+            if request.nama_lengkap:
+                profile_updates["nama_lengkap"] = request.nama_lengkap
+                profile_updates["updated_by"] = admin_user.username
+
+            # Perform updates
+            if user_updates:
+                user_repo.update_user(user_id, user_updates)
+
+            if profile_updates and profile:
+                user_repo.update_user_profile(profile.id, profile_updates)
+
+            # Commit transaction
+            user_repo.commit()
+
+            return ok("", "User updated successfully!", HTTP_OK)
+        except HTTPException as e:
+            user_repo.rollback()
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            user_repo.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def toggle_user_active(
         user_id: str,
-        current_admin: User = Depends(require_admin),
+        request: ToggleUserActiveRequest,
+        authorization: str,
         db: Session = Depends(get_db),
-    ) -> RedirectResponse:
-        """Toggle user active status"""
+    ) -> JSONResponse:
+        """Toggle user active status - Admin only"""
         try:
-            repo = AdminRepository(db)
-            user = repo.get_user_by_id(user_id)
-
-            if not user:
-                raise HTTPException(status_code=404, detail="User not found")
-
-            # Toggle active status
-            new_status = not user.is_active
-            success = repo.update_user_active_status(user_id, new_status)
-
-            if not success:
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
                 raise HTTPException(
-                    status_code=400, detail="Failed to update user status"
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
                 )
 
-            repo.commit()
-            return RedirectResponse(url="/admin/users", status_code=302)
+            admin_repo = AdminRepository(db)
 
-        except HTTPException:
-            repo.rollback()
-            raise
+            user = admin_repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail="User not found!",
+                )
+
+            success = admin_repo.update_user_active_status(user_id, request.is_active)
+            if not success:
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Failed to update user status!",
+                )
+
+            admin_repo.commit()
+
+            status_text = "activated" if request.is_active else "deactivated"
+            return ok("", f"User {status_text} successfully!", HTTP_OK)
+        except HTTPException as e:
+            admin_repo.rollback()
+            return formatError(e.detail, e.status_code)
         except Exception as e:
-            repo.rollback()
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+            admin_repo.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def delete_user(
         user_id: str,
-        current_admin: User = Depends(require_admin),
+        authorization: str,
         db: Session = Depends(get_db),
-    ) -> RedirectResponse:
-        """Soft delete user"""
+    ) -> JSONResponse:
+        """Soft delete user - Admin only"""
         try:
-            repo = AdminRepository(db)
-            user = repo.get_user_by_id(user_id)
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
 
+            admin_repo = AdminRepository(db)
+
+            admin_id = get_user_id_from_token(authorization)
+            admin_user = admin_repo.get_admin_by_id(admin_id)
+            if not admin_user:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED,
+                    detail="Invalid admin session!",
+                )
+
+            user = admin_repo.get_user_by_id(user_id)
             if not user:
-                raise HTTPException(status_code=404, detail="User not found")
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail="User not found!",
+                )
 
             # Prevent admin from deleting themselves
-            if user.id == current_admin.id:
-                raise HTTPException(status_code=400, detail="Cannot delete yourself")
+            if user_id == str(admin_user.id):
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Cannot delete yourself!",
+                )
 
-            success = repo.soft_delete_user(user_id, current_admin.username)
-
+            success = admin_repo.soft_delete_user(user_id, admin_user.username)
             if not success:
-                raise HTTPException(status_code=400, detail="Failed to delete user")
+                raise HTTPException(
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Failed to delete user!",
+                )
 
-            repo.commit()
-            return RedirectResponse(url="/admin/users", status_code=302)
+            admin_repo.commit()
 
-        except HTTPException:
-            repo.rollback()
-            raise
+            return ok("", "User deleted successfully!", HTTP_OK)
+        except HTTPException as e:
+            admin_repo.rollback()
+            return formatError(e.detail, e.status_code)
         except Exception as e:
-            repo.rollback()
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+            admin_repo.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)
 
     @staticmethod
     async def change_user_role(
         user_id: str,
-        role: UserRole = Form(...),
-        current_admin: User = Depends(require_admin),
+        request: ChangeUserRoleRequest,
+        authorization: str,
         db: Session = Depends(get_db),
-    ) -> RedirectResponse:
-        """Change user role"""
+    ) -> JSONResponse:
+        """Change user role - Admin only"""
         try:
-            repo = AdminRepository(db)
-            user = repo.get_user_by_id(user_id)
+            admin_repo = AdminRepository(db)
 
+            user = admin_repo.get_user_by_id(user_id)
             if not user:
-                raise HTTPException(status_code=404, detail="User not found")
+                raise HTTPException(
+                    status_code=HTTP_NOT_FOUND,
+                    detail="User not found!",
+                )
 
-            success = repo.update_user_role(user_id, role)
-
+            success = admin_repo.update_user_role(user_id, request.role)
             if not success:
                 raise HTTPException(
-                    status_code=400, detail="Failed to update user role"
+                    status_code=HTTP_BAD_REQUEST,
+                    detail="Failed to update user role!",
                 )
 
-            repo.commit()
-            return RedirectResponse(url="/admin/users", status_code=302)
+            admin_repo.commit()
 
-        except HTTPException:
-            repo.rollback()
-            raise
+            return ok("", f"User role changed to {request.role}!", HTTP_OK)
+        except HTTPException as e:
+            admin_repo.rollback()
+            return formatError(e.detail, e.status_code)
         except Exception as e:
-            repo.rollback()
-            raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-
-    @staticmethod
-    def _verify_password(password: str, stored_password: str) -> bool:
-        """Verify password against stored hash (supports bcrypt and SHA256 fallback)"""
-        try:
-            # Try bcrypt verification first
-            if stored_password.startswith("$2b$") or stored_password.startswith("$2a$"):
-                return bcrypt.checkpw(
-                    password.encode("utf-8"), stored_password.encode("utf-8")
-                )
-            else:
-                # If not bcrypt format, try SHA256 (fallback for old passwords)
-                sha256_hash = hashlib.sha256(password.encode()).hexdigest()
-                return stored_password == sha256_hash
-        except Exception:
-            # If bcrypt fails, try SHA256 (fallback for old passwords)
-            sha256_hash = hashlib.sha256(password.encode()).hexdigest()
-            return stored_password == sha256_hash
+            admin_repo.rollback()
+            return formatError(str(e), HTTP_BAD_REQUEST)

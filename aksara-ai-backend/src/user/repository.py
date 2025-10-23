@@ -15,13 +15,18 @@ class UserRepository:
         self.db = db
 
     # User operations
-    def create_user(self, username: str, password: str, created_by: str) -> User:
+    def create_user(
+        self, username: str, password: str, created_by: str, role=None
+    ) -> User:
         """Create a new user"""
+        from src.user.models import UserRole
+
         user_id = uuid.uuid4().hex
         user = User(
             id=user_id,
             username=username,
             password=password,
+            role=role if role else UserRole.USER,
             is_active=True,
             created_by=created_by,
             created_date=CURRENT_DATETIME,

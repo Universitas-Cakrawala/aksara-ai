@@ -1,71 +1,83 @@
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 
 # 🧠 Request dari user untuk generate chat
 class ChatRequest(BaseModel):
     """Incoming HTTP request body for chat endpoint."""
+
     input: str = Field(..., description="User chat input / prompt")
-    temperature: Optional[float] = Field(default=0.0, description="Sampling temperature for the model")
-    max_tokens: Optional[int] = Field(default=512, description="Max tokens to generate")
+    chat_history_id: Optional[str] = Field(
+        None, description="Existing chat history ID for continuation"
+    )
+    temperature: Optional[float] = Field(
+        default=0.0, ge=0.0, le=1.0, description="Sampling temperature"
+    )
+    max_tokens: Optional[int] = Field(
+        default=512, ge=1, le=4096, description="Max tokens to generate"
+    )
 
 
 # 🗣️ Representasi satu pesan dalam percakapan
-class ChatMessage(BaseModel):
-    role: str = Field(..., description="Speaker role, e.g. 'user' or 'assistant'")
-    content: str = Field(..., description="Message text")
+class ChatMessageResponse(BaseModel):
+    """Single message in chat history"""
+
+    id: str
+    sender: str  # 'user' or 'assistant'
+    text: str
+    created_date: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # 🤖 Response standar dari model
 class ChatResponse(BaseModel):
     """Standard API response wrapping the model reply."""
-    id: Optional[str]
-    model: Optional[str]
-    output: List[Dict[str, Any]]
-    metadata: Optional[Dict[str, Any]] = None
+
+    conversation_id: str
+    model: str
+    input: str
+    output: str
+    timestamp: str
 
 
-# 🗂️ Schema tambahan untuk menyimpan histori chat di database
-class ChatHistory(BaseModel):
-    """Represent a single chat history record."""
+# 🗂️ Schema untuk chat history detail
+class ChatHistoryDetail(BaseModel):
+    """Represent a single chat history record with messages."""
+
     id: str
-    user_id: str
-    title: Optional[str] = None
-    messages: List[ChatMessage]
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    title: str
+    model: str
+    language: str
+    is_active: bool
+    created_date: datetime
+    updated_date: datetime
+    messages: List[ChatMessageResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-# 📜 Schema untuk menampilkan list chat histories
-class ChatHistoryList(BaseModel):
-    histories: List[ChatHistory]
+# 📜 Schema untuk list chat histories (summary only)
+class ChatHistorySummary(BaseModel):
+    """Summary of chat history for listing"""
+
+    id: str
+    title: str
+    model: str
+    message_count: int
+    last_message: Optional[str]
+    created_date: datetime
+    updated_date: datetime
+
+    class Config:
+        from_attributes = True
 
 
-# 🔧 Helper: Build Gemini payload
-def build_gemini_payload(req: ChatRequest, conversation: Optional[List[ChatMessage]] = None) -> Dict[str, Any]:
-    messages = []
-    if conversation:
-        for msg in conversation:
-            messages.append({"author": msg.role, "content": msg.content})
+class ChatHistoryListResponse(BaseModel):
+    """Response for listing chat histories"""
 
-    messages.append({"author": "user", "content": req.input})
-
-    return {
-        "model": "gemini-2.5-flash-preview-05-20",
-        "messages": messages,
-        "temperature": req.temperature or 0.0,
-        "max_output_tokens": req.max_tokens or 512,
-    }
-
-
-# 🔧 Helper: Create chat response
-def create_chat_response(
-    id: Optional[str],
-    model: Optional[str],
-    outputs: List[Dict[str, Any]],
-    metadata: Optional[Dict[str, Any]] = None,
-):
-    return ChatResponse(id=id, model=model, output=outputs, metadata=metadata)
+    histories: List[ChatHistorySummary]
+    total: int

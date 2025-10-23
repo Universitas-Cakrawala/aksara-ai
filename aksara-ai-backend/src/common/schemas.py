@@ -8,6 +8,7 @@ These schemas define the standardized format for success and error responses.
 from typing import Any, Generic, Optional, TypeVar
 
 from fastapi import status
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel as BaseModelV2, Field
 from starlette.responses import JSONResponse
 
@@ -58,6 +59,8 @@ def create_success_response(
         JSONResponse with standardized format
     """
     content = {"message": message, "data": data if data is not None else {}}
+    # Ensure all values (e.g., datetime) are JSON serializable
+    content = jsonable_encoder(content)
     return JSONResponse(status_code=status_code, content=content)
 
 
@@ -92,6 +95,8 @@ def create_error_response(
     if details:
         content["error"]["details"] = details
 
+    # Ensure all values (e.g., datetime) are JSON serializable
+    content = jsonable_encoder(content)
     return JSONResponse(status_code=status_code, content=content)
 
 

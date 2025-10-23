@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from src.auth.handler import get_current_user, signJWT
+from src.auth.handler import signJWT
 from src.config.postgres import get_db
 from src.constants import (
     HTTP_ACCEPTED,
@@ -11,6 +11,7 @@ from src.constants import (
     HTTP_NOT_FOUND,
     HTTP_OK,
     HTTP_UNAUTHORIZED,
+    HTTP_FORBIDDEN,
 )
 from src.user.repository import UserRepository
 from src.user.schemas import (
@@ -22,7 +23,12 @@ from src.user.schemas import (
     actionTransformUserLogin,
     mapUserProfileData,
 )
-from src.user.utils import get_password_hash, verify_password
+from src.middleware.middleware import (
+    get_password_hash,
+    verify_password,
+    get_user_id_from_token,
+    require_user_role,
+)
 from src.utils.helper import formatError, ok, validateEmail
 
 
@@ -117,32 +123,18 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Initialize repository
             repo = UserRepository(db)
 
-            # Validate authorization token
-            if not authorization:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="Authorization token is missing!",
-                )
-
-            # Extract token
-            if isinstance(authorization, str) and "Bearer" in authorization:
-                try:
-                    token = authorization.split("Bearer", 1)[1].strip()
-                except Exception:
-                    token = authorization
-            else:
-                token = authorization
-
-            # Validate user session
-            user_id = get_current_user(token)
-            if user_id is None:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="You are not logged in!",
-                )
+            # Get user ID from token (authentication already handled by middleware)
+            user_id = get_user_id_from_token(authorization)
 
             # Validate email format
             if not validateEmail(request.email):
@@ -230,32 +222,18 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Initialize repository
             repo = UserRepository(db)
 
-            # Validate authorization token
-            if not authorization:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="Authorization token is missing!",
-                )
-
-            # Extract token
-            if isinstance(authorization, str) and "Bearer" in authorization:
-                try:
-                    token = authorization.split("Bearer", 1)[1].strip()
-                except Exception:
-                    token = authorization
-            else:
-                token = authorization
-
-            # Validate user session
-            user_id = get_current_user(token)
-            if user_id is None:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="You are not logged in!",
-                )
+            # Get user ID from token (authentication already handled by middleware)
+            user_id = get_user_id_from_token(authorization)
 
             # Validate that the user is updating their own profile
             if user_id != id:
@@ -420,32 +398,18 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Initialize repository
             repo = UserRepository(db)
 
-            # Validate authorization token
-            if not authorization:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="Authorization token is missing!",
-                )
-
-            # Extract token
-            if isinstance(authorization, str) and "Bearer" in authorization:
-                try:
-                    token = authorization.split("Bearer", 1)[1].strip()
-                except Exception:
-                    token = authorization
-            else:
-                token = authorization
-
-            # Get current user ID from token
-            user_id = get_current_user(token)
-            if user_id is None:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="You are not logged in!",
-                )
+            # Get user ID from token (authentication already handled by middleware)
+            user_id = get_user_id_from_token(authorization)
 
             # Get user with profile from repository
             user_with_profile = repo.get_user_with_profile(user_id)
@@ -473,32 +437,18 @@ class UserController:
         db: Session = Depends(get_db),
     ) -> JSONResponse:
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Initialize repository
             repo = UserRepository(db)
 
-            # Validate authorization token
-            if not authorization:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="Authorization token is missing!",
-                )
-
-            # Extract token
-            if isinstance(authorization, str) and "Bearer" in authorization:
-                try:
-                    token = authorization.split("Bearer", 1)[1].strip()
-                except Exception:
-                    token = authorization
-            else:
-                token = authorization
-
-            # Validate user session
-            user_id = get_current_user(token)
-            if user_id is None:
-                raise HTTPException(
-                    status_code=HTTP_UNAUTHORIZED,
-                    detail="You are not logged in!",
-                )
+            # Get user ID from token (authentication already handled by middleware)
+            user_id = get_user_id_from_token(authorization)
 
             # Get user data from repository
             user_data = repo.get_user_by_id(id)

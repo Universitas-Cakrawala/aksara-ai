@@ -14,7 +14,9 @@ from sqlalchemy.orm import Session
 from src.config.postgres import SessionLocal
 from src.user.models import UserRole
 from src.user.repository import UserRepository
-from src.user.utils import get_password_hash  # Use the same password hashing as the app
+from src.middleware.middleware import (
+    get_password_hash,
+)  # Use the same password hashing as the app
 
 
 def create_admin_user(db: Session):
