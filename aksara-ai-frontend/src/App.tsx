@@ -56,7 +56,9 @@ function App() {
     return (
         <AuthProvider>
             <Router>
-                <AppRoutes />
+                <PageWrapper>
+                    <AppRoutes />
+                </PageWrapper>
             </Router>
         </AuthProvider>
     );
