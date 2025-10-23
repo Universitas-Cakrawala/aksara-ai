@@ -8,10 +8,16 @@ from src.constants import (
     HTTP_ACCEPTED,
     HTTP_BAD_REQUEST,
     HTTP_CREATED,
+    HTTP_FORBIDDEN,
     HTTP_NOT_FOUND,
     HTTP_OK,
     HTTP_UNAUTHORIZED,
-    HTTP_FORBIDDEN,
+)
+from src.middleware.middleware import (
+    get_password_hash,
+    get_user_id_from_token,
+    require_user_role,
+    verify_password,
 )
 from src.user.repository import UserRepository
 from src.user.schemas import (
@@ -22,12 +28,6 @@ from src.user.schemas import (
     UserUpdate,
     actionTransformUserLogin,
     mapUserProfileData,
-)
-from src.middleware.middleware import (
-    get_password_hash,
-    verify_password,
-    get_user_id_from_token,
-    require_user_role,
 )
 from src.utils.helper import formatError, ok, validateEmail
 

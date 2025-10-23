@@ -1,4 +1,5 @@
-from pydantic import BaseModel as BaseModelV2, conint
+from pydantic import BaseModel as BaseModelV2
+from pydantic import conint
 
 
 class PageParams(BaseModelV2):

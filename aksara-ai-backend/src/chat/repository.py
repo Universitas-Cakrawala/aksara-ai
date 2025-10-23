@@ -5,8 +5,9 @@ All business logic moved to controller
 
 import uuid
 from typing import List, Optional
-from sqlalchemy.orm import Session
+
 from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from src.chat.models import ChatHistory, ChatMessage
 

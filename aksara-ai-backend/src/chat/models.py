@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field
 import uuid
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
 
 
 class ChatHistory(SQLModel, table=True):

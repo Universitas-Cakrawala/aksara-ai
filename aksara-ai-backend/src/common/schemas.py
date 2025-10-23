@@ -9,7 +9,8 @@ from typing import Any, Generic, Optional, TypeVar
 
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel as BaseModelV2, Field
+from pydantic import BaseModel as BaseModelV2
+from pydantic import Field
 from starlette.responses import JSONResponse
 
 T = TypeVar("T")

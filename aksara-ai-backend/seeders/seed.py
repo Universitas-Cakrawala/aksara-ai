@@ -12,11 +12,11 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy.orm import Session
 
 from src.config.postgres import SessionLocal
+from src.middleware.middleware import (  # Use the same password hashing as the app
+    get_password_hash,
+)
 from src.user.models import UserRole
 from src.user.repository import UserRepository
-from src.middleware.middleware import (
-    get_password_hash,
-)  # Use the same password hashing as the app
 
 
 def create_admin_user(db: Session):

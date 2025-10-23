@@ -5,6 +5,7 @@ This middleware handles JWT authentication and role-based authorization for all 
 
 from typing import Optional
 
+import bcrypt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -12,8 +13,6 @@ from src.auth.handler import get_current_user
 from src.config.postgres import get_db
 from src.constants import HTTP_FORBIDDEN, HTTP_UNAUTHORIZED
 from src.user.models import User, UserRole
-
-import bcrypt
 from src.utils.helper import log
 
 
@@ -63,7 +62,7 @@ def get_current_active_user(authorization: str, db: Session = Depends(get_db)) -
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=HTTP_UNAUTHORIZED, detail="Invalid authorization token"
         )

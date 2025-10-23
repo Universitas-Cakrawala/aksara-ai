@@ -13,22 +13,23 @@ from src.admin.schemas import (
     ChangeUserRoleRequest,
     ToggleUserActiveRequest,
 )
-
 from src.config.postgres import get_db
 from src.constants import (
     HTTP_BAD_REQUEST,
     HTTP_CREATED,
+    HTTP_FORBIDDEN,
     HTTP_NOT_FOUND,
     HTTP_OK,
     HTTP_UNAUTHORIZED,
-    HTTP_FORBIDDEN,
+)
+from src.middleware.middleware import (
+    get_password_hash,
+    get_user_id_from_token,
+    require_admin_role,
 )
 from src.user.repository import UserRepository
-from src.middleware.middleware import get_password_hash
 from src.utils.date import serialize_date
 from src.utils.helper import formatError, ok, validateEmail
-from src.middleware.middleware import require_admin_role
-from src.middleware.middleware import get_user_id_from_token
 
 
 class AdminController:

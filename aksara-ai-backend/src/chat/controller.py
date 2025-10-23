@@ -4,24 +4,25 @@ All database queries executed here using repository
 """
 
 from datetime import datetime
+
+import google.genai as genai
+from decouple import config
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from decouple import config
-import google.genai as genai
 
+from src.chat.repository import ChatRepository
 from src.chat.schemas import (
+    ChatHistoryDetail,
+    ChatHistoryListResponse,
+    ChatHistorySummary,
+    ChatMessageResponse,
     ChatRequest,
     ChatResponse,
-    ChatHistoryDetail,
-    ChatHistorySummary,
-    ChatHistoryListResponse,
-    ChatMessageResponse,
 )
-from src.chat.repository import ChatRepository
 from src.config.postgres import get_db
-from src.utils.helper import formatError, ok
 from src.constants import HTTP_INTERNAL_SERVER_ERROR
 from src.middleware.middleware import get_user_id_from_token
+from src.utils.helper import formatError, ok
 
 
 class ChatController:
