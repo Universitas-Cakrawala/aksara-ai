@@ -171,6 +171,39 @@ class UserRepository:
             query = query.filter(User.id != exclude_user_id)
         return query.first() is not None
 
+    # Refresh Token operations
+    def revoke_user_refresh_tokens(self, user_id: str) -> bool:
+        """Revoke all refresh tokens for a user (mark as revoked)"""
+        from src.refresh_token.models import RefreshToken
+
+        result = (
+            self.db.query(RefreshToken)
+            .filter(RefreshToken.user_id == user_id, RefreshToken.is_revoked == False)
+            .update({"is_revoked": True, "updated_date": CURRENT_DATETIME})
+        )
+        return result > 0
+
+    def revoke_refresh_token_by_token(self, token: str) -> bool:
+        """Revoke a specific refresh token"""
+        from src.refresh_token.models import RefreshToken
+
+        result = (
+            self.db.query(RefreshToken)
+            .filter(RefreshToken.token == token, RefreshToken.is_revoked == False)
+            .update({"is_revoked": True, "updated_date": CURRENT_DATETIME})
+        )
+        return result > 0
+
+    def get_active_refresh_tokens_count(self, user_id: str) -> int:
+        """Get count of active (non-revoked) refresh tokens for a user"""
+        from src.refresh_token.models import RefreshToken
+
+        return (
+            self.db.query(RefreshToken)
+            .filter(RefreshToken.user_id == user_id, RefreshToken.is_revoked == False)
+            .count()
+        )
+
     # Transaction management
     def commit(self):
         """Commit the current transaction"""

@@ -117,6 +117,19 @@ class ResponseExamples:
         }
 
     @staticmethod
+    def user_logout_responses() -> Dict:
+        """Response examples for user logout endpoint"""
+        return {
+            200: ResponseExamples.success_response(
+                "Successfully logged out",
+                {"logged_out": True},
+            ),
+            401: ResponseExamples.error_response(
+                "You are not logged in!", 401, "Unauthorized"
+            ),
+        }
+
+    @staticmethod
     def user_update_responses() -> Dict:
         """Response examples for update user endpoint"""
         return {

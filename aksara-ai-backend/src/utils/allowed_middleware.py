@@ -4,7 +4,8 @@ ALLOWED_ORIGINS = [
 ]
 
 # List of HTTP methods that are allowed
-ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE"]
+# Include PATCH, OPTIONS and HEAD to support preflight and partial updates
+ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]
 
 # List of HTTP headers that are allowed
 ALLOWED_HEADERS = [

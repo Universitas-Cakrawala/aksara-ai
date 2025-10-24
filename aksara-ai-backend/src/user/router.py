@@ -52,6 +52,22 @@ async def get_user_profile(
     return await UserController.profile(authorization, db)
 
 
+@routerUser.post(
+    "/logout",
+    responses=(
+        ResponseExamples.user_logout_responses()
+        if hasattr(ResponseExamples, "user_logout_responses")
+        else {}
+    ),
+    summary="Logout user",
+)
+async def logout_user(
+    authorization: str = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    return await UserController.logout(authorization, db)
+
+
 @routerUser.put(
     "/{id}",
     responses=ResponseExamples.user_update_responses(),

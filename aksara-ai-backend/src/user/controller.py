@@ -506,3 +506,59 @@ class UserController:
         except Exception as e:
             repo.rollback()
             return formatError(str(e), HTTP_BAD_REQUEST)
+
+    @staticmethod
+    async def logout(
+        authorization: str,
+        db: Session = Depends(get_db),
+    ) -> JSONResponse:
+        try:
+            # Extract user ID from authorization token (validation done by middleware)
+            user_id = get_user_id_from_token(authorization)
+
+            if not user_id:
+                raise HTTPException(
+                    status_code=HTTP_UNAUTHORIZED, detail="Invalid or expired token"
+                )
+
+            # Initialize repository
+            repo = UserRepository(db)
+
+            # Get user to verify exists and is active
+            user = repo.get_user_by_id(user_id)
+            if not user:
+                raise HTTPException(status_code=HTTP_NOT_FOUND, detail="User not found")
+
+            # Revoke all active refresh tokens for this user (token blacklist approach)
+            # This ensures any existing refresh tokens become invalid
+            tokens_revoked = repo.revoke_user_refresh_tokens(user_id)
+
+            # Commit the revocation to database
+            repo.commit()
+
+            # Return success response
+            # Frontend should clear access_token and refresh_token from local storage
+            return ok(
+                {
+                    "logged_out": True,
+                    "tokens_revoked": tokens_revoked,
+                    "message": "All sessions have been terminated",
+                },
+                "Successfully logged out",
+                HTTP_OK,
+            )
+
+        except HTTPException as e:
+            if repo:
+                repo.rollback()
+            return formatError(e.detail, e.status_code)
+        except Exception as e:
+            if repo:
+                repo.rollback()
+            # Log unexpected errors for debugging
+            import logging
+
+            logging.getLogger(__name__).error(f"Logout error: {str(e)}")
+            return formatError(
+                "An error occurred during logout. Please try again.", HTTP_BAD_REQUEST
+            )
