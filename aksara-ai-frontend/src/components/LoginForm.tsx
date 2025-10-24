@@ -8,6 +8,7 @@ import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as z from 'zod';
 
 const loginSchema = z.object({
@@ -21,6 +22,7 @@ type FormData = z.infer<typeof loginSchema>;
 const LoginForm: React.FC = () => {
     const [tampilkanPassword, setTampilkanPassword] = useState(false);
     const { login, isLoading } = useAuth();
+    const navigate = useNavigate();
 
     const {
         register,
@@ -33,7 +35,20 @@ const LoginForm: React.FC = () => {
 
     const onSubmit = async (data: FormData) => {
         try {
-            await login(data.username, data.password);
+            await login(data.username, data.password, () => {
+                const userData = localStorage.getItem('userData');
+                if (userData) {
+                    try {
+                        const parsed = JSON.parse(userData);
+                        if (parsed.role === 'ADMIN') {
+                            navigate('/admin');
+                            return;
+                        }
+                    } catch {}
+                }
+                // default redirect
+                navigate('/chat');
+            });
             if (data.remember) localStorage.setItem('ingatUser', data.username);
         } catch (error: any) {
             setError('root', {

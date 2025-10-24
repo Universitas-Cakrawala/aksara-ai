@@ -55,6 +55,7 @@ export interface AuthResponse {
     user: {
         id: string;
         username: string;
+        role?: string;
         nama_lengkap: string;
         email: string;
     };
@@ -71,6 +72,7 @@ export const authApi = {
             user: {
                 id: result.id,
                 username: result.username,
+                role: result.role,
                 nama_lengkap: result.nama_lengkap,
                 email: result.email,
             },
@@ -87,6 +89,7 @@ export const authApi = {
             user: {
                 id: result.id,
                 username: result.username,
+                role: result.role,
                 nama_lengkap: result.nama_lengkap,
                 email: result.email,
             },
@@ -121,23 +124,27 @@ export const authApi = {
         const response = await api.put(`/users/update-password/${userId}`, data);
         return response.data;
     },
+
+    logout: async () => {
+        const response = await api.post('/users/logout');
+        return response.data;
+    },
 };
 
 export interface ChatRequest {
     input: string;
     temperature?: number;
     max_tokens?: number;
+    chat_history_id?: string;
 }
 
+// Response returned by backend ChatController
 export interface ChatResponse {
-    id: string;
+    conversation_id: string;
     model: string;
     input: string;
     output: string;
-    metadata: {
-        temperature: number;
-        max_tokens: number;
-    };
+    timestamp: string;
 }
 
 export interface ChatHistory {
@@ -176,12 +183,98 @@ export const chatApi = {
 
     getChatHistories: async (): Promise<ChatHistory[]> => {
         const response = await api.get('/chat/histories');
-        return response.data.data;
+        const payload = response.data?.data;
+
+        // Backend returns { histories: [...], total: n }
+        let items: any[] = [];
+        if (Array.isArray(payload)) {
+            items = payload;
+        } else if (payload && Array.isArray(payload.histories)) {
+            items = payload.histories;
+        } else {
+            items = [];
+        }
+
+        // Normalize each item to ChatHistory interface expected by the UI
+        const normalized: ChatHistory[] = items.map((it: any) => ({
+            conversation_id: it.id || it.conversation_id || '',
+            title: it.title || it.name || 'New Chat',
+            last_message_preview: it.last_message || it.last_message_preview || '',
+            last_sender: it.last_sender || '',
+            last_timestamp: it.updated_date || it.last_timestamp || it.created_date || new Date().toISOString(),
+            total_messages: it.message_count ?? it.total_messages ?? 0,
+            model: it.model || '',
+            language: it.language || '',
+            is_active: typeof it.is_active === 'boolean' ? it.is_active : true,
+            created_date: it.created_date || new Date().toISOString(),
+        }));
+
+        return normalized;
     },
 
     getChatHistoryById: async (historyId: string): Promise<ChatHistoryDetail> => {
         const response = await api.get(`/chat/histories/${historyId}`);
         return response.data.data;
+    },
+};
+
+export interface AdminStatistics {
+    total_users: number;
+    admin_users: number;
+    regular_users: number;
+}
+
+export interface AdminUser {
+    id: string;
+    username: string;
+    role: string;
+    is_active: boolean;
+    deleted: boolean;
+    created_date: string;
+    email?: string | null;
+    nama_lengkap?: string | null;
+}
+
+export const adminApi = {
+    getStatistics: async (): Promise<AdminStatistics> => {
+        const response = await api.get('/admin/statistics');
+        return response.data.data;
+    },
+
+    getUsers: async (): Promise<AdminUser[]> => {
+        const response = await api.get('/admin/users');
+        return response.data.data;
+    },
+
+    toggleUserActive: async (userId: string, isActive: boolean) => {
+        const response = await api.patch(`/admin/users/${userId}/toggle-active`, { is_active: isActive });
+        return response.data;
+    },
+
+    changeUserRole: async (userId: string, role: string) => {
+        const response = await api.patch(`/admin/users/${userId}/change-role`, { role });
+        return response.data;
+    },
+
+    deleteUser: async (userId: string) => {
+        const response = await api.delete(`/admin/users/${userId}`);
+        return response.data;
+    },
+
+    createUser: async (data: {
+        username: string;
+        password: string;
+        nama_lengkap: string;
+        email: string;
+        role: string;
+    }) => {
+        const response = await api.post('/admin/users', data);
+        return response.data;
+    },
+
+    updateUser: async (userId: string, data: Partial<{ username: string; role: string; is_active: boolean; nama_lengkap: string; email: string }>) => {
+        const response = await api.put(`/admin/users/${userId}`, data);
+        return response.data;
     },
 };
 

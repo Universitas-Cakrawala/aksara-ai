@@ -8,6 +8,7 @@ interface User {
     username: string;
     nama_lengkap: string;
     email: string;
+    role?: string;
 }
 
 interface AuthContextType {
@@ -142,7 +143,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.warn('Failed to fetch profile after login:', profileError);
             }
 
-            setUser(response.user);
+            // ensure role is part of user object
+            const userWithRole = { ...response.user } as any;
+            setUser(userWithRole);
 
             if (callback) callback(); // redirect opsional
         } catch (error: any) {
@@ -213,6 +216,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = useCallback((callback?: () => void) => {
+        // Notify backend about logout, but do not block UI on failure
+        (async () => {
+            try {
+                await authApi.logout();
+            } catch (err) {
+                console.warn('Backend logout failed:', err);
+            }
+        })();
+
         localStorage.removeItem('token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('userData');

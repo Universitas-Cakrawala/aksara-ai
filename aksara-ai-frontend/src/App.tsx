@@ -4,6 +4,7 @@ import AuthPage from '@/pages/AuthPage';
 import ChatPage from '@/pages/ChatPage';
 import LandingPage from '@/pages/LandingPage';
 import ProfilePage from '@/pages/ProfilePage';
+import AdminPage from '@/pages/AdminPage';
 import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
@@ -27,8 +28,34 @@ const AppRoutes: React.FC = () => {
             <Route path="/" element={<LandingPage />} />
 
             {/* Auth routes dengan mode yang berbeda */}
-            <Route path="/login" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="login" />} />
-            <Route path="/register" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="register" />} />
+            <Route
+                path="/login"
+                element={
+                    user ? (
+                        user.role === 'ADMIN' ? (
+                            <Navigate to="/admin" replace />
+                        ) : (
+                            <Navigate to="/chat" replace />
+                        )
+                    ) : (
+                        <AuthPage mode="login" />
+                    )
+                }
+            />
+            <Route
+                path="/register"
+                element={
+                    user ? (
+                        user.role === 'ADMIN' ? (
+                            <Navigate to="/admin" replace />
+                        ) : (
+                            <Navigate to="/chat" replace />
+                        )
+                    ) : (
+                        <AuthPage mode="register" />
+                    )
+                }
+            />
             {/* Redirect dari /auth ke /login untuk backward compatibility */}
             <Route path="/auth" element={<Navigate to="/login" replace />} />
             <Route
@@ -36,6 +63,14 @@ const AppRoutes: React.FC = () => {
                 element={
                     <ProtectedRoute>
                         <ChatPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin"
+                element={
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminPage />
                     </ProtectedRoute>
                 }
             />

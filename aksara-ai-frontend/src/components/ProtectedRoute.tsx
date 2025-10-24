@@ -4,9 +4,10 @@ import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
+    requiredRole?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
     const { user, isLoading } = useAuth();
 
     if (isLoading) {
@@ -20,7 +21,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         );
     }
 
-    return user ? <>{children}</> : <Navigate to="/auth" replace />;
+    if (!user) return <Navigate to="/auth" replace />;
+
+    if (requiredRole && user.role !== requiredRole) {
+        // If user is authenticated but doesn't have required role, redirect to auth page (or show 403)
+        return <Navigate to="/auth" replace />;
+    }
+
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;

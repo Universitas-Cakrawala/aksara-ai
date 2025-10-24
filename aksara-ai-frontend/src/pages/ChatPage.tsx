@@ -145,7 +145,7 @@ const ChatPage: React.FC = () => {
         setIsTyping(true);
 
         try {
-            if (DUMMY_MODE) {
+                if (DUMMY_MODE) {
                 const aiResponse = await mockChatApi.sendMessage(currentMessage);
                 const aiMessage: Message = {
                     id: aiResponse.id,
@@ -156,18 +156,28 @@ const ChatPage: React.FC = () => {
                 setMessages((prev) => [...prev, aiMessage]);
             } else {
                 // Use real Gemini AI API
-                const chatResponse = await chatApi.sendMessage({
+                const payload = {
                     input: currentMessage,
                     temperature: 0.7,
                     max_tokens: 512,
-                });
+                    // include selected chat id if present to continue conversation
+                    ...(selectedChatId ? { chat_history_id: selectedChatId } : {}),
+                };
+
+                const chatResponse = await chatApi.sendMessage(payload);
 
                 const aiMessage: Message = {
-                    id: chatResponse.id,
+                    id: chatResponse.conversation_id + '_' + Date.now().toString(),
                     content: chatResponse.output,
                     sender: 'ai',
-                    timestamp: new Date(),
+                    timestamp: new Date(chatResponse.timestamp || Date.now()),
                 };
+
+                // If backend returned a conversation_id, set it as selectedChatId
+                if (chatResponse.conversation_id) {
+                    setSelectedChatId(chatResponse.conversation_id);
+                }
+
                 setMessages((prev) => [...prev, aiMessage]);
             }
         } catch (error) {
