@@ -46,7 +46,7 @@ const ChatPage: React.FC = () => {
                         {
                             id: '1',
                             content:
-                                'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+                                'Halo! Saya adalah Aksara AI, asisten virtual untuk UKM literasi Universitas Cakrawala. Ada yang bisa saya bantu?',
                             sender: 'ai',
                             timestamp: new Date(),
                         },
@@ -58,7 +58,7 @@ const ChatPage: React.FC = () => {
                     {
                         id: '1',
                         content:
-                            'Halo! Saya adalah Aksara AI, asisten virtual untuk komunitas literasi kampus. Ada yang bisa saya bantu?',
+                                'Halo! Saya adalah Aksara AI, asisten virtual untuk UKM literasi Universitas Cakrawala. Ada yang bisa saya bantu?',
                         sender: 'ai',
                         timestamp: new Date(),
                     },
@@ -235,7 +235,7 @@ const ChatPage: React.FC = () => {
                             <Menu className="h-4 w-4" />
                         </Button>
                         <div>
-                            <h1 className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-2xl font-bold text-transparent">
+                            <h1 className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-2xl font-bold text-transparent">
                                 Aksara AI
                             </h1>
                             <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
@@ -288,7 +288,7 @@ const ChatPage: React.FC = () => {
                                         }`}
                                     >
                                         {message.sender === 'ai' && (
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-600">
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-600">
                                                 <Bot className="h-4 w-4 text-white" />
                                             </div>
                                         )}
