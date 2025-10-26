@@ -220,7 +220,7 @@ const ChatPage: React.FC = () => {
     // ===========================
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-gray-50 to-gray-200">
+        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-mustard-50 to-mustard-200">
             {/* Header */}
             <div className="border-b bg-white shadow-sm">
                 <div className="flex items-center justify-between px-4 py-4">
