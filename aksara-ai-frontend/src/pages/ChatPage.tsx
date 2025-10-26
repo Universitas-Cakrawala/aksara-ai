@@ -294,7 +294,7 @@ const ChatPage: React.FC = () => {
                                         )}
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${
-                                                message.sender === 'user' ? 'bg-orange-600 text-white' : 'bg-gray-100'
+                                                message.sender === 'user' ? 'bg-orange-500 text-white' : 'bg-gray-100'
                                             }`}
                                         >
                                             <p className="whitespace-pre-wrap text-sm">{message.content}</p>
