@@ -235,7 +235,7 @@ const ChatPage: React.FC = () => {
                             <Menu className="h-4 w-4" />
                         </Button>
                         <div>
-                            <h1 className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-2xl font-bold text-transparent">
+                            <h1 className="bg-gradient-to-r from-amber-700 to-yellow-700 bg-clip-text text-2xl font-bold text-transparent">
                                 Aksara AI
                             </h1>
                             <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
