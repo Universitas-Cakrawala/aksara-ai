@@ -3,12 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodRfesolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as z from 'zod';
 
 const loginSchema = z.object({
@@ -46,7 +45,6 @@ const LoginForm: React.FC = () => {
                         }
                     } catch {}
                 }
-                // default redirect
                 navigate('/chat');
             });
             if (data.remember) localStorage.setItem('ingatUser', data.username);
@@ -57,22 +55,11 @@ const LoginForm: React.FC = () => {
         }
     };
 
-    const handleGoogleLogin = async () => {
-        try {
-            // await loginWithGoogle(); // ambil dari AuthContext (misalnya Firebase Google Auth)
-        } catch (error: any) {
-            setError('root', {
-                message: error.message || 'Gagal login dengan Google',
-            });
-        }
-    };
-
     return (
         <Card className="w-full shadow-lg transition-shadow duration-300 hover:shadow-xl">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-center text-2xl font-bold">Masuk ke Aksara AI</CardTitle>
                 <CardDescription className="text-center text-muted-foreground">
-                    {/* Masukkan username dan password Anda atau gunakan Google */}
                     Masukkan username dan password Anda
                 </CardDescription>
             </CardHeader>
@@ -136,24 +123,6 @@ const LoginForm: React.FC = () => {
                         {isLoading ? 'Masuk...' : 'Masuk'}
                     </Button>
                 </form>
-{/* 
-                Divider
-                <div className="my-6 flex items-center">
-                    <hr className="flex-1 border-gray-300" />
-                    <span className="px-3 text-sm text-gray-500">atau</span>
-                    <hr className="flex-1 border-gray-300" />
-                </div>
-
-                Tombol Google
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="flex w-full items-center justify-center gap-2"
-                    onClick={handleGoogleLogin}
-                >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5" />
-                    Continue with Google
-                </Button> */}
 
                 {/* Navigasi daftar */}
                 <div className="mt-6 text-center">
