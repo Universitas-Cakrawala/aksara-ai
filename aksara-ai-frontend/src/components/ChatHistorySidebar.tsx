@@ -1,5 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { chatApi, type ChatHistory } from '@/services/api';
 import { MessageCircle, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -8,6 +18,7 @@ interface ChatHistorySidebarProps {
     selectedChatId?: string;
     onChatSelect: (chatId: string) => void;
     onNewChat: () => void;
+    onChatCreated?: () => void; // Add callback for when chat is created
     className?: string;
 }
 
@@ -15,12 +26,15 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
     selectedChatId,
     onChatSelect,
     onNewChat,
+    onChatCreated,
     className = '',
 }) => {
     const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
     // Load chat histories
     const loadChatHistories = useCallback(async () => {
@@ -41,6 +55,17 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
         loadChatHistories();
     }, [loadChatHistories]);
 
+    // Expose refresh function to parent via callback
+    useEffect(() => {
+        if (onChatCreated) {
+            // Store the refresh function reference
+            (window as any).__refreshChatHistory = loadChatHistories;
+        }
+        return () => {
+            delete (window as any).__refreshChatHistory;
+        };
+    }, [loadChatHistories, onChatCreated]);
+
     // Filter chat histories based on search query
     const filteredHistories = chatHistories.filter((chat) =>
         chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -48,27 +73,33 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
     );
 
     // Handle chat deletion (soft delete)
-    const handleDeleteChat = useCallback(async (chatId: string, event: React.MouseEvent) => {
+    const handleDeleteChat = useCallback((chatId: string, event: React.MouseEvent) => {
         event.stopPropagation(); // Prevent chat selection
-        
-        if (!window.confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
-            return;
-        }
+        setChatToDelete(chatId);
+        setDeleteDialogOpen(true);
+    }, []);
+
+    const confirmDelete = useCallback(async () => {
+        if (!chatToDelete) return;
         
         try {
-            await chatApi.deleteChatHistory(chatId);
+            await chatApi.deleteChatHistory(chatToDelete);
             // Remove from local state on success
-            setChatHistories(prev => prev.filter(chat => chat.conversation_id !== chatId));
+            setChatHistories(prev => prev.filter(chat => chat.conversation_id !== chatToDelete));
             
             // If deleted chat was selected, trigger new chat
-            if (selectedChatId === chatId) {
+            if (selectedChatId === chatToDelete) {
                 onNewChat();
             }
+            
+            setDeleteDialogOpen(false);
+            setChatToDelete(null);
         } catch (err) {
             console.error('Failed to delete chat:', err);
             setError('Failed to delete chat. Please try again.');
+            setDeleteDialogOpen(false);
         }
-    }, [selectedChatId, onNewChat]);
+    }, [chatToDelete, selectedChatId, onNewChat]);
 
     // Format timestamp for display
     const formatTimestamp = (timestamp: string): string => {
@@ -216,6 +247,27 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Chat History?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this chat? This action cannot be undone and all messages will be permanently removed.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

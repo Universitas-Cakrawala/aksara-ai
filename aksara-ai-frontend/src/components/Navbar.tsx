@@ -14,7 +14,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing' }) => {
                 variant === 'landing' ? 'sticky top-0 z-50' : ''
             }`}
         >
-            <div className="container flex h-16 items-center justify-between px-4">
+            <div className="w-full flex h-16 items-center justify-between px-4">
                 {/* Bagian logo */}
                 <div className="flex items-center space-x-2">
                     <Link to="/" className="flex items-center space-x-2">

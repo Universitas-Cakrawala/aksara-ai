@@ -25,7 +25,7 @@ const AppRoutes: React.FC = () => {
     return (
         <Routes>
             {/* Landing Page - dapat diakses tanpa autentikasi */}
-            <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
+            <Route path="/" element={<PageWrapper fullWidth><LandingPage /></PageWrapper>} />
 
             {/* Auth routes dengan mode yang berbeda */}
             <Route
