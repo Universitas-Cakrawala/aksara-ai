@@ -12,13 +12,13 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import ChatHistorySidebar from '@/components/ChatHistorySidebar';
+import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
 import { chatApi } from '@/services/api';
 import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
 import { mockChatApi } from '@/services/mockApi';
-import { Bot, LogOut, Menu, Send, User } from 'lucide-react';
+import { Bot, Send, User } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface Message {
     id: string;
@@ -36,8 +36,7 @@ const ChatPage: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     // Load initial messages
     useEffect(() => {
@@ -184,17 +183,20 @@ const ChatPage: React.FC = () => {
                     timestamp: new Date(chatResponse.timestamp || Date.now()),
                 };
 
-                // If backend returned a conversation_id, set it as selectedChatId
+                // Update selectedChatId if we got a conversation_id
                 if (chatResponse.conversation_id) {
                     setSelectedChatId(chatResponse.conversation_id);
-                    
-                    // Refresh chat history sidebar when new chat is created
-                    if (typeof (window as any).__refreshChatHistory === 'function') {
-                        (window as any).__refreshChatHistory();
-                    }
                 }
 
                 setMessages((prev) => [...prev, aiMessage]);
+
+                // Refresh chat history sidebar after sending message
+                // Use setTimeout to ensure backend has processed the message
+                setTimeout(() => {
+                    if (typeof (window as any).__refreshChatHistory === 'function') {
+                        (window as any).__refreshChatHistory();
+                    }
+                }, 500);
             }
         } catch (error) {
             console.error('Error sending message:', error);
@@ -233,41 +235,15 @@ const ChatPage: React.FC = () => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-orange-100 via-mustard-50 to-mustard-200">
-            {/* Header */}
-            <div className="border-b bg-white shadow-sm w-full">
-                <div className="flex items-center justify-between px-6 py-4 max-w-full">
-                    <div className="flex items-center gap-4">
-                        {/* Sidebar Toggle for Mobile */}
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="lg:hidden"
-                        >
-                            <Menu className="h-4 w-4" />
-                        </Button>
-                        <div>
-                            <h1 className="bg-gradient-to-r from-amber-700 to-yellow-700 bg-clip-text text-2xl font-bold text-transparent">
-                                Aksara AI
-                            </h1>
-                            <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
-                            <User className="mr-2 h-4 w-4" />
-                            <span className="text-sm">{user?.nama_lengkap}</span>
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleLogout}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Keluar
-                        </Button>
-                    </div>
-                </div>
-            </div>
+            {/* Navbar */}
+            <Navbar 
+                variant="chat" 
+                onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+                onLogout={handleLogout}
+            />
 
             {/* Main Content Area */}
-            <div className="flex h-[calc(100vh-80px)] w-full">
+            <div className="flex h-[calc(100vh-64px)] w-full">{/* 64px is navbar height */}
                 {/* Sidebar */}
                 <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden lg:w-80 flex-shrink-0`}>
                     <ChatHistorySidebar
@@ -291,7 +267,7 @@ const ChatPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="h-full space-y-4 overflow-y-auto pr-4 scrollbar scrollbar-w-2 hover:scrollbar-thumb-amber-600">
+                            <div className="h-full space-y-4 overflow-y-auto pr-4 scrollbar-w-2 scrollbar-thumb-neutral-500 hover:scrollbar-thumb-neutral-600">
                                 {messages.map((message) => (
                                     <div
                                         key={message.id}

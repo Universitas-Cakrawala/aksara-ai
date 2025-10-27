@@ -31,7 +31,7 @@ const AppRoutes: React.FC = () => {
             <Route
                 path="/login"
                 element={
-                    <PageWrapper>
+                    <PageWrapper fullWidth>
                         {user ? (
                             user.role === 'ADMIN' ? (
                                 <Navigate to="/admin" replace />
@@ -47,7 +47,7 @@ const AppRoutes: React.FC = () => {
             <Route
                 path="/register"
                 element={
-                    <PageWrapper>
+                    <PageWrapper fullWidth>
                         {user ? (
                             user.role === 'ADMIN' ? (
                                 <Navigate to="/admin" replace />

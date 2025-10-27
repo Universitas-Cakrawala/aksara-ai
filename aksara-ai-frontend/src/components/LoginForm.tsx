@@ -68,11 +68,12 @@ const LoginForm: React.FC = () => {
     };
 
     return (
-        <Card className="mx-auto w-full max-w-md shadow-lg transition-shadow duration-300 hover:shadow-xl">
+        <Card className="w-full shadow-lg transition-shadow duration-300 hover:shadow-xl">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-center text-2xl font-bold">Masuk ke Aksara AI</CardTitle>
                 <CardDescription className="text-center text-muted-foreground">
-                    Masukkan username dan password Anda atau gunakan Google
+                    {/* Masukkan username dan password Anda atau gunakan Google */}
+                    Masukkan username dan password Anda
                 </CardDescription>
             </CardHeader>
 
@@ -135,15 +136,15 @@ const LoginForm: React.FC = () => {
                         {isLoading ? 'Masuk...' : 'Masuk'}
                     </Button>
                 </form>
-
-                {/* Divider */}
+{/* 
+                Divider
                 <div className="my-6 flex items-center">
                     <hr className="flex-1 border-gray-300" />
                     <span className="px-3 text-sm text-gray-500">atau</span>
                     <hr className="flex-1 border-gray-300" />
                 </div>
 
-                {/* Tombol Google */}
+                Tombol Google
                 <Button
                     type="button"
                     variant="outline"
@@ -152,7 +153,7 @@ const LoginForm: React.FC = () => {
                 >
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5" />
                     Continue with Google
-                </Button>
+                </Button> */}
 
                 {/* Navigasi daftar */}
                 <div className="mt-6 text-center">
