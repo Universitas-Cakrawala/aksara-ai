@@ -88,10 +88,10 @@ const ChatPage: React.FC = () => {
             } else {
                 const chatDetail = await chatApi.getChatHistoryById(chatId);
                 const formattedMessages = chatDetail.messages.map((msg) => ({
-                    id: msg.message_id,
+                    id: msg.id,
                     content: msg.text,
-                    sender: msg.sender === 'model' ? 'ai' : msg.sender as 'user' | 'ai',
-                    timestamp: new Date(msg.timestamp),
+                    sender: msg.sender === 'assistant' ? 'ai' : msg.sender as 'user' | 'ai',
+                    timestamp: new Date(msg.created_date),
                 }));
                 setMessages(formattedMessages);
             }
@@ -305,7 +305,12 @@ const ChatPage: React.FC = () => {
                                                         : 'text-gray-500'
                                                 }`}
                                             >
-                                                {message.timestamp.toLocaleTimeString()}
+                                                {message.timestamp instanceof Date && !isNaN(message.timestamp.getTime())
+                                                    ? message.timestamp.toLocaleTimeString('id-ID', {
+                                                          hour: '2-digit',
+                                                          minute: '2-digit',
+                                                      })
+                                                    : 'Invalid Date'}
                                             </p>
                                         </div>
                                         {message.sender === 'user' && (
@@ -318,7 +323,7 @@ const ChatPage: React.FC = () => {
 
                                 {isTyping && (
                                     <div className="flex justify-start gap-3">
-                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-600">
                                             <Bot className="h-4 w-4 text-white" />
                                         </div>
                                         <div className="rounded-lg bg-muted p-3">

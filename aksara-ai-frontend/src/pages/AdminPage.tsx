@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { adminApi, type AdminStatistics, type AdminUser } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminPage: React.FC = () => {
     const [stats, setStats] = useState<AdminStatistics | null>(null);
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const load = async () => {
@@ -54,13 +56,26 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     if (!user) {
         return <div className="p-6">Unauthorized</div>;
     }
 
     return (
         <div className="container p-6">
-            <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-600">Welcome, {user.username}</span>
+                    <Button variant="outline" onClick={handleLogout}>
+                        Logout
+                    </Button>
+                </div>
+            </div>
 
             {loading && <p>Loading...</p>}
 

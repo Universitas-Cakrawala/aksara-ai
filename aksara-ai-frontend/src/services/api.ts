@@ -161,17 +161,18 @@ export interface ChatHistory {
 }
 
 export interface ChatHistoryDetail {
-    conversation_id: string;
+    id: string;
     title: string;
     model: string;
     language: string;
     is_active: boolean;
     created_date: string;
+    updated_date: string;
     messages: Array<{
-        message_id: string;
+        id: string;
         sender: string;
         text: string;
-        timestamp: string;
+        created_date: string;
     }>;
 }
 
