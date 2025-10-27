@@ -156,6 +156,10 @@ class ChatController:
             return formatError(e.detail, e.status_code)
         except Exception as e:
             db.rollback()
+            print(f"❌ Error in generate_chat_response: {str(e)}")
+            print(f"❌ Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
             return formatError(str(e), HTTP_INTERNAL_SERVER_ERROR)
 
     @staticmethod
@@ -172,19 +176,29 @@ class ChatController:
             # Transform to summary format
             summaries = []
             for chat in chat_histories:
-                messages = repo.get_messages_by_chat_id(chat.id)
-                last_message = messages[-1].text if messages else None
+                try:
+                    messages = repo.get_messages_by_chat_id(chat.id or "")
+                    last_message = messages[-1].text if messages else None
 
-                summary = ChatHistorySummary(
-                    id=chat.id,
-                    title=chat.title or "New Chat",
-                    model=chat.model,
-                    message_count=len(messages),
-                    last_message=last_message,
-                    created_date=chat.created_date,
-                    updated_date=chat.updated_date,
-                )
-                summaries.append(summary)
+                    # Ensure dates are not None
+                    created_date = chat.created_date or datetime.now()
+                    updated_date = chat.updated_date or datetime.now()
+
+                    summary = ChatHistorySummary(
+                        id=chat.id or "",
+                        title=chat.title or "New Chat",
+                        model=chat.model,
+                        message_count=len(messages),
+                        last_message=last_message,
+                        created_date=created_date,
+                        updated_date=updated_date,
+                    )
+                    summaries.append(summary)
+                except Exception as e:
+                    print(f"❌ Error processing chat {chat.id}: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
 
             response = ChatHistoryListResponse(
                 histories=summaries, total=len(summaries)
@@ -194,6 +208,9 @@ class ChatController:
         except HTTPException as e:
             return formatError(e.detail, e.status_code)
         except Exception as e:
+            print(f"❌ Error in get_chat_histories: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return formatError(str(e), HTTP_INTERNAL_SERVER_ERROR)
 
     @staticmethod
