@@ -9,11 +9,11 @@ import React from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
 // Wrapper sederhana (cuma padding & max-width)
-const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PageWrapper: React.FC<{ children: React.ReactNode; fullWidth?: boolean }> = ({ children, fullWidth = false }) => {
     return (
         <div className="flex min-h-screen flex-col bg-gradient-to-br from-orange-100 via-gray-50 to-gray-200">
-            <main className="flex flex-1 items-center justify-center px-4">
-                <div className="w-full max-w-4xl">{children}</div>
+            <main className={`flex flex-1 ${fullWidth ? '' : 'items-center justify-center px-4'}`}>
+                <div className={fullWidth ? 'w-full' : 'w-full max-w-4xl'}>{children}</div>
             </main>
         </div>
     );
@@ -25,35 +25,39 @@ const AppRoutes: React.FC = () => {
     return (
         <Routes>
             {/* Landing Page - dapat diakses tanpa autentikasi */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
 
             {/* Auth routes dengan mode yang berbeda */}
             <Route
                 path="/login"
                 element={
-                    user ? (
-                        user.role === 'ADMIN' ? (
-                            <Navigate to="/admin" replace />
+                    <PageWrapper>
+                        {user ? (
+                            user.role === 'ADMIN' ? (
+                                <Navigate to="/admin" replace />
+                            ) : (
+                                <Navigate to="/chat" replace />
+                            )
                         ) : (
-                            <Navigate to="/chat" replace />
-                        )
-                    ) : (
-                        <AuthPage mode="login" />
-                    )
+                            <AuthPage mode="login" />
+                        )}
+                    </PageWrapper>
                 }
             />
             <Route
                 path="/register"
                 element={
-                    user ? (
-                        user.role === 'ADMIN' ? (
-                            <Navigate to="/admin" replace />
+                    <PageWrapper>
+                        {user ? (
+                            user.role === 'ADMIN' ? (
+                                <Navigate to="/admin" replace />
+                            ) : (
+                                <Navigate to="/chat" replace />
+                            )
                         ) : (
-                            <Navigate to="/chat" replace />
-                        )
-                    ) : (
-                        <AuthPage mode="register" />
-                    )
+                            <AuthPage mode="register" />
+                        )}
+                    </PageWrapper>
                 }
             />
             {/* Redirect dari /auth ke /login untuk backward compatibility */}
@@ -62,7 +66,9 @@ const AppRoutes: React.FC = () => {
                 path="/chat"
                 element={
                     <ProtectedRoute>
-                        <ChatPage />
+                        <PageWrapper fullWidth>
+                            <ChatPage />
+                        </PageWrapper>
                     </ProtectedRoute>
                 }
             />
@@ -70,7 +76,9 @@ const AppRoutes: React.FC = () => {
                 path="/admin"
                 element={
                     <ProtectedRoute requiredRole="ADMIN">
-                        <AdminPage />
+                        <PageWrapper fullWidth>
+                            <AdminPage />
+                        </PageWrapper>
                     </ProtectedRoute>
                 }
             />
@@ -78,7 +86,9 @@ const AppRoutes: React.FC = () => {
                 path="/profile"
                 element={
                     <ProtectedRoute>
-                        <ProfilePage />
+                        <PageWrapper>
+                            <ProfilePage />
+                        </PageWrapper>
                     </ProtectedRoute>
                 }
             />
@@ -91,9 +101,7 @@ function App() {
     return (
         <AuthProvider>
             <Router>
-                <PageWrapper>
-                    <AppRoutes />
-                </PageWrapper>
+                <AppRoutes />
             </Router>
         </AuthProvider>
     );
