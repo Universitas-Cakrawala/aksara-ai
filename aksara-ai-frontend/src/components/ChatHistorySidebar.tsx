@@ -107,11 +107,11 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
 
         if (diffInHours < 1) {
             const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-            return `${diffInMinutes}m ago`;
+            return `${diffInMinutes}m yang lalu`;
         } else if (diffInHours < 24) {
-            return `${Math.floor(diffInHours)}h ago`;
+            return `${Math.floor(diffInHours)}j yang lalu`;
         } else if (diffInDays < 7) {
-            return `${Math.floor(diffInDays)}d ago`;
+            return `${Math.floor(diffInDays)}h yang lalu`;
         } else {
             return date.toLocaleDateString();
         }
@@ -121,7 +121,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
         return (
             <div className={`bg-white border-r border-gray-200 ${className}`}>
                 <div className="p-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-800">Chat History</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Histori Percakapan</h2>
                 </div>
                 <div className="p-4">
                     <div className="flex items-center justify-center h-32">
@@ -137,7 +137,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
             {/* Header with New Chat button */}
             <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800">Chats</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Percakapan</h2>
                     <Button
                         onClick={onNewChat}
                         size="sm"
@@ -152,7 +152,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                         type="text"
-                        placeholder="Search chats..."
+                        placeholder="Cari Percakapan..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
@@ -171,18 +171,18 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                             variant="outline"
                             className="mt-2"
                         >
-                            Retry
+                            Coba Lagi
                         </Button>
                     </div>
                 ) : filteredHistories.length === 0 ? (
                     <div className="p-4">
                         {searchQuery ? (
                             <div className="text-gray-500 text-sm text-center">
-                                No chats found for "{searchQuery}"
+                                Tidak ada hasil percakapan untuk "{searchQuery}"
                             </div>
                         ) : (
                             <div className="text-gray-500 text-sm text-center">
-                                No chat history yet. Start a new conversation!
+                                Belum ada histori percakapan. Mulai percakapan baru!
                             </div>
                         )}
                     </div>
@@ -216,7 +216,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                                                 {formatTimestamp(chat.last_timestamp)}
                                             </span>
                                             <span className="text-xs text-gray-400">
-                                                {chat.total_messages} messages
+                                                {chat.total_messages} pesan
                                             </span>
                                         </div>
                                     </div>
@@ -235,7 +235,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                                 {chat.is_active && (
                                     <div className="flex items-center mt-2">
                                         <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
-                                        <span className="text-xs text-green-600">Active</span>
+                                        <span className="text-xs text-green-600">Aktif</span>
                                     </div>
                                 )}
                             </div>
@@ -248,18 +248,18 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Chat History?</AlertDialogTitle>
+                        <AlertDialogTitle>Hapus Histori Percakapan?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this chat? This action cannot be undone and all messages will be permanently removed.
+                            Apakah anda yakin ingin menghapus percakapan ini? Tindakan ini tidak dapat dibatalkan dan semua pesan akan dihapus secara permanen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Batalkan</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={confirmDelete}
                             className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
                         >
-                            Delete
+                            Hapus
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
