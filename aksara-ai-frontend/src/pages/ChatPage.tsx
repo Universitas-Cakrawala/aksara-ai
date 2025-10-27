@@ -220,7 +220,7 @@ const ChatPage: React.FC = () => {
     // ===========================
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-gray-50 to-gray-200">
+        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-mustard-50 to-mustard-200">
             {/* Header */}
             <div className="border-b bg-white shadow-sm">
                 <div className="flex items-center justify-between px-4 py-4">
@@ -235,7 +235,7 @@ const ChatPage: React.FC = () => {
                             <Menu className="h-4 w-4" />
                         </Button>
                         <div>
-                            <h1 className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-2xl font-bold text-transparent">
+                            <h1 className="bg-gradient-to-r from-amber-700 to-yellow-700 bg-clip-text text-2xl font-bold text-transparent">
                                 Aksara AI
                             </h1>
                             <p className="text-sm text-muted-foreground">Chat AI untuk Komunitas Literasi</p>
@@ -294,7 +294,7 @@ const ChatPage: React.FC = () => {
                                         )}
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${
-                                                message.sender === 'user' ? 'bg-orange-600 text-white' : 'bg-gray-100'
+                                                message.sender === 'user' ? 'bg-orange-500 text-white' : 'bg-gray-100'
                                             }`}
                                         >
                                             <p className="whitespace-pre-wrap text-sm">{message.content}</p>
