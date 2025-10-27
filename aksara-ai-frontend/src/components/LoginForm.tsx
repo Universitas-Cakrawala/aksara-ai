@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodRfesolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -56,7 +56,7 @@ const LoginForm: React.FC = () => {
     };
 
     return (
-        <Card className="mx-auto w-full max-w-md shadow-lg transition-shadow duration-300 hover:shadow-xl">
+        <Card className="w-full shadow-lg transition-shadow duration-300 hover:shadow-xl">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-center text-2xl font-bold">Masuk ke Aksara AI</CardTitle>
                 <CardDescription className="text-center text-muted-foreground">

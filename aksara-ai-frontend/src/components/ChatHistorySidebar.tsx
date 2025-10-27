@@ -18,7 +18,6 @@ interface ChatHistorySidebarProps {
     selectedChatId?: string;
     onChatSelect: (chatId: string) => void;
     onNewChat: () => void;
-    onChatCreated?: () => void; // Add callback for when chat is created
     className?: string;
 }
 
@@ -26,7 +25,6 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
     selectedChatId,
     onChatSelect,
     onNewChat,
-    onChatCreated,
     className = '',
 }) => {
     const [chatHistories, setChatHistories] = useState<ChatHistory[]>([]);
@@ -55,16 +53,14 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
         loadChatHistories();
     }, [loadChatHistories]);
 
-    // Expose refresh function to parent via callback
+    // Expose refresh function globally so ChatPage can trigger it
     useEffect(() => {
-        if (onChatCreated) {
-            // Store the refresh function reference
-            (window as any).__refreshChatHistory = loadChatHistories;
-        }
+        (window as any).__refreshChatHistory = loadChatHistories;
+        
         return () => {
             delete (window as any).__refreshChatHistory;
         };
-    }, [loadChatHistories, onChatCreated]);
+    }, [loadChatHistories]);
 
     // Filter chat histories based on search query
     const filteredHistories = chatHistories.filter((chat) =>

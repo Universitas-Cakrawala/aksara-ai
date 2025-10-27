@@ -16,7 +16,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     }, [mode]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
+        <div className="w-full min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
             {/* Navbar */}
             <Navbar variant="auth" />
 
