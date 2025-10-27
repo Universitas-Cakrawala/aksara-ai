@@ -95,7 +95,7 @@ const AdminPage: React.FC = () => {
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
                         Admin Dashboard
                     </h1>
-                    <p className="text-muted-foreground mt-1">Manage users and system settings</p>
+                    <p className="text-muted-foreground mt-1">Manajemen User dan pengaturan sistem</p>
                 </div>
 
             {loading && (
@@ -122,7 +122,7 @@ const AdminPage: React.FC = () => {
             )}
 
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">User Management</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Manajemen User</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">
                         <thead>
@@ -154,7 +154,7 @@ const AdminPage: React.FC = () => {
                                                 ? 'bg-green-100 text-green-800' 
                                                 : 'bg-red-100 text-red-800'
                                         }`}>
-                                            {u.is_active ? 'Active' : 'Inactive'}
+                                            {u.is_active ? 'Aktif' : 'Tidak Aktif'}
                                         </span>
                                     </td>
                                     <td className="p-3">
@@ -165,21 +165,21 @@ const AdminPage: React.FC = () => {
                                                 onClick={() => toggleActive(u.id, u.is_active)}
                                                 className={!u.is_active ? "bg-green-600 hover:bg-green-700" : ""}
                                             >
-                                                {u.is_active ? 'Deactivate' : 'Activate'}
+                                                {u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                                             </Button>
                                             <Button 
                                                 size="sm" 
                                                 variant="outline"
                                                 onClick={() => changeRole(u.id, u.role === 'ADMIN' ? 'USER' : 'ADMIN')}
                                             >
-                                                {u.role === 'ADMIN' ? '→ User' : '→ Admin'}
+                                                {u.role === 'ADMIN' ? 'Jadikan User' : 'Jadikan Admin'}
                                             </Button>
                                             <Button 
                                                 size="sm" 
                                                 variant="destructive" 
                                                 onClick={() => deleteUser(u.id)}
                                             >
-                                                Delete
+                                                Hapus
                                             </Button>
                                         </div>
                                     </td>
