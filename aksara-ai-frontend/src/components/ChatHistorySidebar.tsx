@@ -51,12 +51,24 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
     const handleDeleteChat = useCallback(async (chatId: string, event: React.MouseEvent) => {
         event.stopPropagation(); // Prevent chat selection
         
-        // TODO: Implement soft delete API call
-        console.log('Delete chat:', chatId);
+        if (!window.confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+            return;
+        }
         
-        // For now, just remove from local state
-        setChatHistories(prev => prev.filter(chat => chat.conversation_id !== chatId));
-    }, []);
+        try {
+            await chatApi.deleteChatHistory(chatId);
+            // Remove from local state on success
+            setChatHistories(prev => prev.filter(chat => chat.conversation_id !== chatId));
+            
+            // If deleted chat was selected, trigger new chat
+            if (selectedChatId === chatId) {
+                onNewChat();
+            }
+        } catch (err) {
+            console.error('Failed to delete chat:', err);
+            setError('Failed to delete chat. Please try again.');
+        }
+    }, [selectedChatId, onNewChat]);
 
     // Format timestamp for display
     const formatTimestamp = (timestamp: string): string => {

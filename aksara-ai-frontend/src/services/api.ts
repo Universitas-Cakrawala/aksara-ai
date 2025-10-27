@@ -217,6 +217,11 @@ export const chatApi = {
         const response = await api.get(`/chat/histories/${historyId}`);
         return response.data.data;
     },
+
+    deleteChatHistory: async (historyId: string) => {
+        const response = await api.delete(`/chat/histories/${historyId}`);
+        return response.data;
+    },
 };
 
 export interface AdminStatistics {
@@ -244,6 +249,11 @@ export const adminApi = {
 
     getUsers: async (): Promise<AdminUser[]> => {
         const response = await api.get('/admin/users');
+        return response.data.data;
+    },
+
+    getUser: async (userId: string): Promise<AdminUser> => {
+        const response = await api.get(`/admin/users/${userId}`);
         return response.data.data;
     },
 
