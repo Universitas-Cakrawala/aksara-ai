@@ -13,8 +13,8 @@ const LandingPage: React.FC = () => {
             icon: '🤖',
         },
         {
-            title: 'Komunitas Kampus',
-            description: 'Bergabung dengan komunitas literasi kampus yang aktif dan inspiratif',
+            title: 'Ruang Aksara',
+            description: 'Tempat bertemu ide, diskusi, dan karya. Semua bisa jadi bagian dari cerita literasi kampus.',
             icon: '🎓',
         },
         {

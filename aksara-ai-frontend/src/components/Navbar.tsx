@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '@/assets/logo_Aksara.png'; // pastikan path ini sesuai struktur folder kamu
 
 interface NavbarProps {
     variant?: 'landing' | 'auth';
@@ -14,8 +15,14 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing' }) => {
             }`}
         >
             <div className="container flex h-16 items-center justify-between px-4">
+                {/* Bagian logo */}
                 <div className="flex items-center space-x-2">
                     <Link to="/" className="flex items-center space-x-2">
+                        <img
+                            src={logo}
+                            alt="Logo Aksara"
+                            className="h-12 w-12 object-contain"
+                        />
                         <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-2xl font-bold text-transparent">
                             Aksara AI
                         </span>
@@ -24,18 +31,16 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing' }) => {
 
                 {/* Menu navigasi - hanya di landing page */}
                 {variant === 'landing' && (
-                    <>
-                        <div className="flex items-center space-x-3">
-                            <Link to="/login">
-                                <Button variant="ghost" size="sm">
-                                    Login
-                                </Button>
-                            </Link>
-                            <Link to="/register">
-                                <Button size="sm">Register</Button>
-                            </Link>
-                        </div>
-                    </>
+                    <div className="flex items-center space-x-3">
+                        <Link to="/login">
+                            <Button variant="ghost" size="sm">
+                                Login
+                            </Button>
+                        </Link>
+                        <Link to="/register">
+                            <Button size="sm">Register</Button>
+                        </Link>
+                    </div>
                 )}
             </div>
         </nav>
