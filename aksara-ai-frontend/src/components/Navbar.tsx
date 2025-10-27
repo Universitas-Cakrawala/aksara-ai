@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { LogOut, User, Menu } from 'lucide-react';
 
 interface NavbarProps {
-    variant?: 'landing' | 'auth' | 'chat';
+    variant?: 'landing' | 'auth' | 'chat' | 'admin';
     onMenuToggle?: () => void;
     onLogout?: () => void;
 }
@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing', onMenuToggle, onLo
     return (
         <nav
             className={`w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 ${
-                variant === 'landing' || variant === 'chat' ? 'sticky top-0 z-50' : ''
+                variant === 'landing' || variant === 'chat' || variant === 'admin' ? 'sticky top-0 z-50' : ''
             }`}
         >
             <div className="w-full flex h-16 items-center justify-between px-4">
@@ -53,6 +53,14 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing', onMenuToggle, onLo
                             </p>
                         </>
                     )}
+                    {variant === 'admin' && (
+                        <>
+                            <span className='bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text leading-none text-2xl font-bold text-transparent'>|</span>
+                            <p className="text-md leading-none text-muted-foreground hidden sm:block ml-2">
+                                Admin Dashboard
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 {/* Menu navigasi - hanya di landing page */}
@@ -79,6 +87,17 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing', onMenuToggle, onLo
                         <Button variant="outline" size="sm" onClick={onLogout}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span className="hidden sm:inline">Keluar</span>
+                        </Button>
+                    </div>
+                )}
+
+                {/* Menu navigasi - hanya di admin page */}
+                {variant === 'admin' && user && (
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-600 hidden sm:inline">Welcome, {user.username}</span>
+                        <Button variant="outline" size="sm" onClick={onLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span className="hidden sm:inline">Logout</span>
                         </Button>
                     </div>
                 )}

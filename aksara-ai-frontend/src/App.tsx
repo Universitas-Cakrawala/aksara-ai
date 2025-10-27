@@ -86,7 +86,7 @@ const AppRoutes: React.FC = () => {
                 path="/profile"
                 element={
                     <ProtectedRoute>
-                        <PageWrapper>
+                        <PageWrapper fullWidth>
                             <ProfilePage />
                         </PageWrapper>
                     </ProtectedRoute>
