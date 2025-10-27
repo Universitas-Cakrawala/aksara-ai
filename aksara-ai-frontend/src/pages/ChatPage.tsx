@@ -220,10 +220,10 @@ const ChatPage: React.FC = () => {
     // ===========================
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-100 via-mustard-50 to-mustard-200">
+        <div className="min-h-screen w-full bg-gradient-to-br from-orange-100 via-mustard-50 to-mustard-200">
             {/* Header */}
-            <div className="border-b bg-white shadow-sm">
-                <div className="flex items-center justify-between px-4 py-4">
+            <div className="border-b bg-white shadow-sm w-full">
+                <div className="flex items-center justify-between px-6 py-4 max-w-full">
                     <div className="flex items-center gap-4">
                         {/* Sidebar Toggle for Mobile */}
                         <Button
@@ -255,9 +255,9 @@ const ChatPage: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex h-[calc(100vh-80px)]">
+            <div className="flex h-[calc(100vh-80px)] w-full">
                 {/* Sidebar */}
-                <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden lg:w-80`}>
+                <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden lg:w-80 flex-shrink-0`}>
                     <ChatHistorySidebar
                         selectedChatId={selectedChatId || undefined}
                         onChatSelect={handleChatSelect}
@@ -267,10 +267,10 @@ const ChatPage: React.FC = () => {
                 </div>
 
                 {/* Chat Container */}
-                <div className="flex-1 flex flex-col p-4">
+                <div className="flex-1 flex flex-col p-6 max-w-full overflow-hidden">
                 {/* Messages */}
-                <Card className="mb-4 flex-1">
-                    <CardContent className="h-full overflow-hidden p-4">
+                <Card className="mb-4 flex-1 overflow-hidden">
+                    <CardContent className="h-full overflow-hidden p-0">
                         {isLoading ? (
                             <div className="flex h-full items-center justify-center">
                                 <div className="space-y-2 text-center">
@@ -279,7 +279,7 @@ const ChatPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="h-full space-y-4 overflow-y-auto pr-2">
+                            <div className="h-full space-y-4 overflow-y-auto pr-4 scrollbar scrollbar-w-2 hover:scrollbar-thumb-amber-600">
                                 {messages.map((message) => (
                                     <div
                                         key={message.id}
@@ -294,7 +294,7 @@ const ChatPage: React.FC = () => {
                                         )}
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${
-                                                message.sender === 'user' ? 'bg-orange-500 text-white' : 'bg-gray-100'
+                                                message.sender === 'user' ? 'bg-gradient-to-br from-amber-600 to-yellow-600 text-white' : 'bg-gray-100'
                                             }`}
                                         >
                                             <p className="whitespace-pre-wrap text-sm">{message.content}</p>

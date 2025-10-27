@@ -102,7 +102,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                     <Button
                         onClick={onNewChat}
                         size="sm"
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        className="bg-gradient-to-br from-amber-500 to-yellow-600 hover:bg-gradient-to-br hover:from-amber-600 hover:to-yellow-600 text-white"
                     >
                         <Plus className="h-4 w-4" />
                     </Button>
