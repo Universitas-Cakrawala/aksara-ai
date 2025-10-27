@@ -86,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'landing', onMenuToggle, onLo
                         </Button>
                         <Button variant="outline" size="sm" onClick={onLogout}>
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span className="hidden sm:inline">Keluar</span>
+                            <span className="hidden sm:inline">Logout</span>
                         </Button>
                     </div>
                 )}
