@@ -1,6 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import ChatHistorySidebar from '@/components/ChatHistorySidebar';
 import { useAuth } from '@/context/AuthContext';
 import { chatApi } from '@/services/api';
@@ -24,6 +34,7 @@ const ChatPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -176,6 +187,11 @@ const ChatPage: React.FC = () => {
                 // If backend returned a conversation_id, set it as selectedChatId
                 if (chatResponse.conversation_id) {
                     setSelectedChatId(chatResponse.conversation_id);
+                    
+                    // Refresh chat history sidebar when new chat is created
+                    if (typeof (window as any).__refreshChatHistory === 'function') {
+                        (window as any).__refreshChatHistory();
+                    }
                 }
 
                 setMessages((prev) => [...prev, aiMessage]);
@@ -202,20 +218,16 @@ const ChatPage: React.FC = () => {
     };
 
     // ===========================
-    // Logout dengan konfirmasi + fade out + alert
+    // Logout dengan konfirmasi dialog
     const handleLogout = () => {
-        const confirmLogout = window.confirm('Apakah Anda yakin ingin logout?');
-        if (confirmLogout) {
-            // Fade out chat container
-            document.getElementById('chat-container')?.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setLogoutDialogOpen(true);
+    };
 
-            setTimeout(() => {
-                logout(); // panggil fungsi logout dari context
-                setMessages([]); // bersihkan chat
-                setInputMessage(''); // reset input
-                alert('Berhasil logout!');
-            }, 500); // delay 500ms untuk efek fade out
-        }
+    const confirmLogout = () => {
+        logout(); // panggil fungsi logout dari context
+        setMessages([]); // bersihkan chat
+        setInputMessage(''); // reset input
+        setLogoutDialogOpen(false);
     };
     // ===========================
 
@@ -368,6 +380,27 @@ const ChatPage: React.FC = () => {
                     </Card>
                 </div>
             </div>
+
+            {/* Logout Confirmation Dialog */}
+            <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Apakah Anda yakin ingin keluar? Chat yang sedang berlangsung akan tetap tersimpan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmLogout}
+                            className="bg-orange-600 hover:bg-orange-700 focus:ring-orange-600"
+                        >
+                            Ya, Logout
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
