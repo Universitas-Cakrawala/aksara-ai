@@ -111,14 +111,10 @@ const LandingPage: React.FC = () => {
                             <div>
                                 <h2 className="mb-6 text-3xl font-bold md:text-4xl">Tentang Aksara AI</h2>
                                 <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                                    Aksara AI adalah platform inovatif yang menggabungkan kecerdasan buatan dengan
-                                    semangat literasi nusantara. Kami percaya bahwa teknologi dapat menjadi jembatan
-                                    untuk melestarikan dan mengembangkan budaya literasi di lingkungan kampus.
+                                    Ruang tumbuh dan kolaborasi antar mahasiswa dalam mengasah kemampuan literasi multidimensi serta memperkuat budaya akademik yang kritis dan produktif.
                                 </p>
                                 <p className="mb-8 text-lg leading-relaxed text-muted-foreground">
-                                    Dengan AI yang memahami konteks budaya Indonesia, kami membantu mahasiswa dan
-                                    akademisi mengeksplorasi dunia literasi dengan cara yang lebih personal dan
-                                    bermakna.
+                                    Dengan Aksara AI, setiap ide dapat diolah menjadi karya tulis, puisi, atau artikel yang inspiratif dan berkualitas.
                                 </p>
                                 <Link to="/register">
                                     <Button size="lg" className="px-8">
@@ -132,13 +128,16 @@ const LandingPage: React.FC = () => {
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-3">
                                             <span className="text-2xl">🎯</span>
-                                            Misi Kami
+                                            Misi UKM Aksara Cakrawala
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-muted-foreground">
-                                            Membangun ekosistem literasi digital yang berlandaskan nilai-nilai budaya
-                                            Indonesia untuk generasi akademik masa depan.
+                                            1. Menumbuhkan minat baca dan menulis di kalangan mahasiswa.
+                                            2. Mendorong mahasiswa menghasilkan karya tulis kreatif maupun ilmiah.
+                                            3. Menyediakan ruang publikasi dan media ekspresi literasi.
+                                            4. Menyelenggarakan kegiatan literasi yang edukatif dan kolaboratif.
+                                            5. Berkontribusi dalam pengabdian masyarakat melalui gerakan literasi.
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -152,8 +151,8 @@ const LandingPage: React.FC = () => {
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-muted-foreground">
-                                            Menjadi platform literasi AI terdepan yang melestarikan kearifan lokal
-                                            sambil mengadopsi teknologi global.
+                                            Menjadi wadah pengembangan literasi, kepenulisan, dan publikasi ilmiah maupun kreatif bagi mahasiswa, 
+                                            untuk menciptakan generasi intelektual yang kritis, inspiratif, dan berdaya saling global.
                                         </p>
                                     </CardContent>
                                 </Card>
