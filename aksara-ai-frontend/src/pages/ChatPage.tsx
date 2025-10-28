@@ -19,6 +19,8 @@ import { DUMMY_MODE, type DummyMessage } from '@/services/dummyData';
 import { mockChatApi } from '@/services/mockApi';
 import { Bot, Send, User } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     id: string;
@@ -285,7 +287,15 @@ const ChatPage: React.FC = () => {
                                                 message.sender === 'user' ? 'bg-gradient-to-br from-amber-600 to-yellow-600 text-white' : 'bg-gray-100'
                                             }`}
                                         >
-                                            <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                                            {message.sender === 'ai' ? (
+                                                <div className="prose-ai-message">
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {message.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                                            )}
                                             <p
                                                 className={`mt-1 text-xs ${
                                                     message.sender === 'user'
