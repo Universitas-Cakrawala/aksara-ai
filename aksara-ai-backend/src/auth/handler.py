@@ -21,7 +21,7 @@ def token_response(access_token: str, refresh_token: str) -> Dict[str, str]:
 
 # Function used for signing the JWT access and refresh tokens
 def signJWT(id: str) -> Dict[str, str]:
-    # Membuat access token dengan masa berlaku 15 menit
+    # Membuat access token dengan masa berlaku 1 hari
     access_token_expiration = time.time() + ACCESS_TOKEN_EXPIRE_TIME_ONE_DAY
     access_payload = {"id": id, "expires": access_token_expiration, "type": "access"}
     access_token = jwt.encode(access_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
