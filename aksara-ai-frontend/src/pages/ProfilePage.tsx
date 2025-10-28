@@ -171,18 +171,12 @@ const ProfilePage: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
             {/* Header */}
             <div className="border-b bg-white shadow-sm">
-                <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-                    <div className="flex items-center gap-4">
+                <div className="flex w-full items-center justify-between px-4 py-4">
+                    <div className="flex items-center gap-7">
                         <Button variant="ghost" size="sm" onClick={handleBackToChat}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Kembali ke Chat
                         </Button>
-                        <div>
-                            <h1 className="bg-gradient-to-r from-amber-700 to-yellow-700 bg-clip-text text-2xl font-bold text-transparent">
-                                Profile Pengguna
-                            </h1>
-                            <p className="text-sm text-muted-foreground">Kelola informasi akun Anda</p>
-                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <User className="mr-2 h-4 w-4" />
@@ -210,10 +204,10 @@ const ProfilePage: React.FC = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
-                            <span>Informasi Profile</span>
+                            <span>Informasi Profil</span>
                             {!isEditingProfile && (
                                 <Button variant="outline" size="sm" onClick={() => setIsEditingProfile(true)}>
-                                    Edit Profile
+                                    Perbarui Profil 
                                 </Button>
                             )}
                         </CardTitle>
@@ -222,7 +216,7 @@ const ProfilePage: React.FC = () => {
                         <form onSubmit={handleProfileSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="username">Username</Label>
+                                    <Label htmlFor="username">Nama Pengguna</Label>
                                     <Input
                                         id="username"
                                         type="text"
