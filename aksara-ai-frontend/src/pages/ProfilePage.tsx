@@ -204,7 +204,7 @@ const ProfilePage: React.FC = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
-                            <span>Informasi Profile</span>
+                            <span>Informasi Profil</span>
                             {!isEditingProfile && (
                                 <Button variant="outline" size="sm" onClick={() => setIsEditingProfile(true)}>
                                     Perbarui Profil 
