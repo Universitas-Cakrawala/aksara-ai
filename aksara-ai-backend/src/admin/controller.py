@@ -447,8 +447,14 @@ class AdminController:
     ) -> JSONResponse:
         """Change user role - Admin only"""
         try:
-            admin_repo = AdminRepository(db)
+            admin_role = require_admin_role(authorization, db)
+            if not admin_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! Admin role required.",
+                )
 
+            admin_repo = AdminRepository(db)
             user = admin_repo.get_user_by_id(user_id)
             if not user:
                 raise HTTPException(
