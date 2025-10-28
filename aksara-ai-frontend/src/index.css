@@ -85,3 +85,100 @@
         background: linear-gradient(135deg, hsl(39 70% 55% / 0.15), hsl(0 0% 90% / 0.5));
     }
 }
+
+/* 📝 Custom Markdown Styling for AI Messages */
+@layer components {
+    .prose-ai-message {
+        @apply text-sm text-gray-800;
+    }
+    
+    .prose-ai-message p {
+        @apply my-2 leading-relaxed;
+    }
+    
+    .prose-ai-message p:first-child {
+        @apply mt-0;
+    }
+    
+    .prose-ai-message p:last-child {
+        @apply mb-0;
+    }
+    
+    .prose-ai-message strong {
+        @apply font-semibold text-gray-900;
+    }
+    
+    .prose-ai-message em {
+        @apply italic;
+    }
+    
+    .prose-ai-message h1,
+    .prose-ai-message h2,
+    .prose-ai-message h3,
+    .prose-ai-message h4 {
+        @apply font-bold text-gray-900 mt-4 mb-2;
+    }
+    
+    .prose-ai-message h1 {
+        @apply text-lg;
+    }
+    
+    .prose-ai-message h2 {
+        @apply text-base;
+    }
+    
+    .prose-ai-message h3 {
+        @apply text-sm;
+    }
+    
+    .prose-ai-message h1:first-child,
+    .prose-ai-message h2:first-child,
+    .prose-ai-message h3:first-child {
+        @apply mt-0;
+    }
+    
+    .prose-ai-message ul,
+    .prose-ai-message ol {
+        @apply my-2 pl-5 space-y-1;
+    }
+    
+    .prose-ai-message ul {
+        @apply list-disc;
+    }
+    
+    .prose-ai-message ol {
+        @apply list-decimal;
+    }
+    
+    .prose-ai-message li {
+        @apply leading-relaxed;
+    }
+    
+    .prose-ai-message li p {
+        @apply my-0;
+    }
+    
+    .prose-ai-message code {
+        @apply bg-gray-200 px-1.5 py-0.5 rounded text-xs font-mono;
+    }
+    
+    .prose-ai-message pre {
+        @apply bg-gray-200 p-3 rounded-md my-2 overflow-x-auto;
+    }
+    
+    .prose-ai-message pre code {
+        @apply bg-transparent p-0;
+    }
+    
+    .prose-ai-message blockquote {
+        @apply border-l-4 border-amber-500 pl-4 italic my-2 text-gray-700;
+    }
+    
+    .prose-ai-message a {
+        @apply text-amber-600 hover:text-amber-700 underline;
+    }
+    
+    .prose-ai-message hr {
+        @apply border-gray-300 my-3;
+    }
+}
