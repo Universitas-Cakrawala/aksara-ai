@@ -146,7 +146,7 @@ const LandingPage: React.FC = () => {
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-3">
                                             <span className="text-2xl">✨</span>
-                                            Visi Kami
+                                            Visi UKM Aksara Cakrawala
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
