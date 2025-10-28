@@ -512,9 +512,16 @@ class UserController:
         authorization: str,
         db: Session = Depends(get_db),
     ) -> JSONResponse:
+        repo = None
         try:
+            # Add debug logging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Logout attempt - Authorization header present: {bool(authorization)}")
+            
             # Extract user ID from authorization token (validation done by middleware)
             user_id = get_user_id_from_token(authorization)
+            logger.info(f"Extracted user_id: {user_id}")
 
             if not user_id:
                 raise HTTPException(
@@ -527,6 +534,7 @@ class UserController:
             # Get user to verify exists and is active
             user = repo.get_user_by_id(user_id)
             if not user:
+                logger.warning(f"User not found during logout: {user_id}")
                 raise HTTPException(status_code=HTTP_NOT_FOUND, detail="User not found")
 
             # Revoke all active refresh tokens for this user (token blacklist approach)
@@ -551,6 +559,8 @@ class UserController:
         except HTTPException as e:
             if repo:
                 repo.rollback()
+            import logging
+            logging.getLogger(__name__).error(f"Logout HTTPException: status={e.status_code}, detail={e.detail}")
             return formatError(e.detail, e.status_code)
         except Exception as e:
             if repo:
@@ -558,7 +568,7 @@ class UserController:
             # Log unexpected errors for debugging
             import logging
 
-            logging.getLogger(__name__).error(f"Logout error: {str(e)}")
+            logging.getLogger(__name__).error(f"Logout error: {str(e)}, type: {type(e)}")
             return formatError(
                 "An error occurred during logout. Please try again.", HTTP_BAD_REQUEST
             )

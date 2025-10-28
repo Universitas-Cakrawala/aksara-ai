@@ -27,11 +27,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            // Token expired atau invalid
-            localStorage.removeItem('token');
-            localStorage.removeItem('userData');
-            window.location.href = '/auth';
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            // Token expired, invalid, or forbidden
+            // Don't redirect if it's a logout request (user is logging out anyway)
+            if (!error.config?.url?.includes('/logout')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userData');
+                window.location.href = '/auth';
+            }
         }
         return Promise.reject(error);
     },
@@ -126,8 +129,15 @@ export const authApi = {
     },
 
     logout: async () => {
-        const response = await api.post('/users/logout');
-        return response.data;
+        try {
+            const response = await api.post('/users/logout');
+            return response.data;
+        } catch (error) {
+            // Even if logout fails (403/401), we should still clear local storage
+            // This ensures user can log out even if token is already invalid
+            console.warn('Logout API call failed, but clearing local auth data:', error);
+            return { logged_out: true, message: 'Logged out locally' };
+        }
     },
 };
 

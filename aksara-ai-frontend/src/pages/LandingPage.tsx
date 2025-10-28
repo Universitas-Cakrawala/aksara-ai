@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logoAksara from '@/assets/logo_Aksara.png';
 
 const LandingPage: React.FC = () => {
     const features = [
@@ -25,9 +26,24 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
-            {/* Navbar */}
-            <Navbar variant="landing" />
+        <div className="relative min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
+            {/* Background Logo - Subtle Watermark */}
+            <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+                <div
+                    className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 opacity-[0.15] blur-sm"
+                    style={{
+                        backgroundImage: `url(${logoAksara})`,
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                    }}
+                />
+            </div>
+
+            {/* Content Wrapper - Above Background */}
+            <div className="relative z-10">
+                {/* Navbar */}
+                <Navbar variant="landing" />
 
             {/* Hero Section */}
             <section className="container mx-auto px-4 py-20 text-center">
@@ -165,6 +181,7 @@ const LandingPage: React.FC = () => {
 
             {/* Footer */}
             <Footer />
+            </div>
         </div>
     );
 };
