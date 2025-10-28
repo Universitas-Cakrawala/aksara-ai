@@ -20,8 +20,8 @@ from src.chat.schemas import (
     ChatResponse,
 )
 from src.config.postgres import get_db
-from src.constants import HTTP_INTERNAL_SERVER_ERROR
-from src.middleware.middleware import get_user_id_from_token
+from src.constants import HTTP_FORBIDDEN, HTTP_INTERNAL_SERVER_ERROR
+from src.middleware.middleware import get_user_id_from_token, require_user_role
 from src.utils.helper import formatError, ok
 
 
@@ -34,6 +34,13 @@ class ChatController:
     ):
         """Generate chat response using Gemini API and save to database"""
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Get user ID from token (authentication already handled by middleware)
             userId = get_user_id_from_token(authorization)
 
@@ -62,7 +69,7 @@ class ChatController:
             # Get conversation context (previous messages)
             messages = repo.get_messages_by_chat_id(chat_history.id)
             conversation_context = []
-            
+
             # Add system prompt with Aksara AI identity and context
             system_prompt = """Kamu adalah Aksara AI, asisten virtual cerdas untuk UKM Literasi Cakrawala University (Universitas Cakrawala). 
 
@@ -191,9 +198,16 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
                 {"role": "user", "parts": [{"text": system_prompt}]}
             )
             conversation_context.append(
-                {"role": "model", "parts": [{"text": "Baik, saya mengerti. Saya adalah Aksara AI, asisten virtual untuk UKM Literasi Cakrawala University. Saya siap membantu dengan segala hal yang berkaitan dengan literasi akademik, membaca, menulis, penelitian, dan pengembangan kemampuan literasi. Saya akan memberikan respons yang ramah, terstruktur, dan bermanfaat sesuai dengan identitas dan misi saya. Silakan bertanya atau diskusi tentang literasi!"}]}
+                {
+                    "role": "model",
+                    "parts": [
+                        {
+                            "text": "Baik, saya mengerti. Saya adalah Aksara AI, asisten virtual untuk UKM Literasi Cakrawala University. Saya siap membantu dengan segala hal yang berkaitan dengan literasi akademik, membaca, menulis, penelitian, dan pengembangan kemampuan literasi. Saya akan memberikan respons yang ramah, terstruktur, dan bermanfaat sesuai dengan identitas dan misi saya. Silakan bertanya atau diskusi tentang literasi!"
+                        }
+                    ],
+                }
             )
-            
+
             # Add previous conversation messages
             for msg in messages:
                 role = "user" if msg.sender == "user" else "model"
@@ -292,6 +306,7 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
             print(f"❌ Error in generate_chat_response: {str(e)}")
             print(f"❌ Error type: {type(e).__name__}")
             import traceback
+
             traceback.print_exc()
             return formatError(str(e), HTTP_INTERNAL_SERVER_ERROR)
 
@@ -299,6 +314,13 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
     async def get_chat_histories(authorization: str, db: Session = Depends(get_db)):
         """Get all chat histories for current user"""
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Get user ID from token (authentication already handled by middleware)
             userId = get_user_id_from_token(authorization)
 
@@ -330,6 +352,7 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
                 except Exception as e:
                     print(f"❌ Error processing chat {chat.id}: {str(e)}")
                     import traceback
+
                     traceback.print_exc()
                     continue
 
@@ -343,6 +366,7 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
         except Exception as e:
             print(f"❌ Error in get_chat_histories: {str(e)}")
             import traceback
+
             traceback.print_exc()
             return formatError(str(e), HTTP_INTERNAL_SERVER_ERROR)
 
@@ -352,6 +376,13 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
     ):
         """Get chat history detail with all messages"""
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Get user ID from token (authentication already handled by middleware)
             userId = get_user_id_from_token(authorization)
 
@@ -399,6 +430,13 @@ Ingat: Kamu adalah bagian dari komunitas Cakrawala University dan selalu berusah
     ):
         """Delete chat history (soft delete)"""
         try:
+            user_role = require_user_role(authorization, db)
+            if not user_role:
+                raise HTTPException(
+                    status_code=HTTP_FORBIDDEN,
+                    detail="Access denied! User role required.",
+                )
+
             # Get user ID from token (authentication already handled by middleware)
             userId = get_user_id_from_token(authorization)
 

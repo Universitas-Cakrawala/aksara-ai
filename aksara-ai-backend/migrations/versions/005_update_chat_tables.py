@@ -5,8 +5,8 @@ Revises: 004_add_chat_tables
 Create Date: 2025-10-27 10:45:00.000000
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '005_update_chat_tables'
